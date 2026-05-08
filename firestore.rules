@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Users Collection ---
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['uid', 'email'])
+            && data.uid == request.auth.uid
+            && (data.get('name', null) == null || (data.name is string && data.name.size() <= 100))
+            && data.email is string && data.email.size() <= 100
+            && (data.get('age', 0) is int);
+      }
+
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) 
+                    && (incoming().get('createdAt', request.time) == request.time);
+      allow update: if isOwner(userId)
+                    && incoming().uid == existing().uid
+                    && (incoming().get('createdAt', existing().get('createdAt', request.time)) == existing().get('createdAt', request.time))
+                    && (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'age', 'lastState', 'updatedAt', 'createdAt']));
+    }
+
+    // --- Mood Logs ---
+    match /users/{userId}/mood_logs/{logId} {
+      function isValidMood(data) {
+        return data.keys().hasAll(['userId', 'mood', 'timestamp'])
+            && data.userId == userId
+            && data.mood in ['Happy', 'Sad', 'Stressed', 'Anxious', 'Neutral', 'Angry']
+            && (data.get('note', '') is string && data.get('note', '').size() <= 500);
+      }
+
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidMood(incoming()) && incoming().timestamp == request.time;
+      allow delete: if isOwner(userId);
+      // Mood logs are immutable usually, but let's allow delete if they want to remove history
+    }
+
+    // --- Symptom Logs ---
+    match /users/{userId}/symptom_logs/{logId} {
+      function isValidSymptom(data) {
+        return data.keys().hasAll(['userId', 'symptoms', 'timestamp'])
+            && data.userId == userId
+            && data.symptoms is list && data.symptoms.size() <= 20
+            && (data.symptoms.size() == 0 || data.symptoms[0] is string);
+      }
+
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidSymptom(incoming()) && incoming().timestamp == request.time;
+      allow delete: if isOwner(userId);
+    }
+  }
+}

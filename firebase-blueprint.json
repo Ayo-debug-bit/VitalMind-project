@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Basic user information and wellness state",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "age": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastState": { "type": "string", "enum": ["Mild", "Moderate", "Severe"] }
+      },
+      "required": ["uid", "name", "email", "createdAt"]
+    },
+    "MoodLog": {
+      "title": "Mood Log",
+      "description": "Daily mood entries",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "mood": { "type": "string", "enum": ["Happy", "Sad", "Stressed", "Anxious", "Neutral", "Angry"] },
+        "note": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "mood", "timestamp"]
+    },
+    "SymptomLog": {
+      "title": "Symptom Log",
+      "description": "Checklist of symptoms recorded by the user",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "symptoms": { "type": "array", "items": { "type": "string" } },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "symptoms", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "users/{userId}/mood_logs/{logId}": {
+      "schema": "MoodLog",
+      "description": "Collection of mood logs per user"
+    },
+    "users/{userId}/symptom_logs/{logId}": {
+      "schema": "SymptomLog",
+      "description": "Collection of symptom logs per user"
+    }
+  }
+}
