@@ -25,8 +25,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      if (error.code === 'auth/unauthorized-domain') {
+        alert("This domain is not authorized for Firebase Authentication. Please add it to your Firebase Console under Authentication > Settings > Authorized Domains.");
+      } else if (error.code === 'auth/popup-blocked') {
+        alert("The login popup was blocked by your browser. Please allow popups for this site and try again.");
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        // User closed the popup, no need to alert
+      } else {
+        alert("Login failed: " + error.message);
+      }
     }
   };
 

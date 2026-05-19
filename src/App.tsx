@@ -78,7 +78,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   }
 }
 
-type View = 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile';
+type View = 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile' | 'crisis';
 
 function AppContent() {
   const { user, login, logout, loading } = useAuth();
@@ -91,6 +91,7 @@ function AppContent() {
   const [profile, setProfile] = useState<any>(null);
   const [modalInfo, setModalInfo] = useState<{ title: string, content: string } | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showCrisisView, setShowCrisisView] = useState(false);
 
   // Sync data from Firebase
   useEffect(() => {
@@ -200,24 +201,53 @@ function AppContent() {
 
   if (!user) {
     return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center p-6 bg-slate-50">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-sm"
-        >
-          <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl">
-            <Heart className="w-10 h-10 text-white fill-white/20" />
-          </div>
-          <h1 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter uppercase">Vital Mind</h1>
-          <p className="text-slate-500 mb-10 leading-relaxed text-sm font-medium">
-            Next-gen preventive care for young people in Nigeria. Secure, personal, and intelligent.
-          </p>
-          <button onClick={login} className="btn-primary w-full shadow-lg shadow-blue-200 uppercase tracking-widest py-4">
-            Connect with Google
-          </button>
-        </motion.div>
-      </div>
+      <>
+        <div className="h-screen w-screen flex flex-col items-center justify-center p-6 bg-slate-50 relative overflow-hidden">
+          {/* Ambient Background Elements */}
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/50 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-100/50 rounded-full blur-[120px] pointer-events-none" />
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center max-w-sm relative z-10"
+          >
+            <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-blue-200">
+              <Heart className="w-10 h-10 text-white fill-white/20" />
+            </div>
+            <h1 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter uppercase">Vital Mind</h1>
+            <p className="text-slate-500 mb-10 leading-relaxed text-sm font-medium">
+              Next-gen preventive care for young people in Nigeria. Secure, personal, and intelligent wellness monitoring.
+            </p>
+            
+            <div className="space-y-4">
+              <button 
+                onClick={login} 
+                className="btn-primary w-full shadow-xl shadow-blue-200 uppercase tracking-widest py-4 flex items-center justify-center gap-3 transition-transform active:scale-95"
+              >
+                Connect with Google
+              </button>
+              
+              <button 
+                onClick={() => setShowCrisisView(true)}
+                className="w-full py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"
+              >
+                <AlertCircle size={14} className="text-red-500" /> I Need Help Right Now
+              </button>
+            </div>
+            
+            <p className="mt-12 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
+              Preventive care system • v1.1.0
+            </p>
+          </motion.div>
+        </div>
+
+        <AnimatePresence>
+          {showCrisisView && (
+            <CrisisOverlay onClose={() => setShowCrisisView(false)} />
+          )}
+        </AnimatePresence>
+      </>
     );
   }
 
@@ -229,6 +259,7 @@ function AppContent() {
       case 'history': return <HistoryView moodLogs={moodLogs} symptomLogs={symptomLogs} onBack={() => setCurrentView('dashboard')} />;
       case 'resources': return <ResourcesView setModalInfo={setModalInfo} onBack={() => setCurrentView('dashboard')} />;
       case 'profile': return <ProfileEditView profile={profile} userId={user.uid} onBack={() => setCurrentView('dashboard')} />;
+      case 'crisis': return <CrisisView onBack={() => setCurrentView('dashboard')} />;
     }
   };
 
@@ -267,6 +298,12 @@ function AppContent() {
             onClick={() => setCurrentView('resources')} 
             icon={<BookOpen size={20} />} 
             label="Help Library" 
+          />
+          <SidebarItem 
+            active={currentView === 'crisis'} 
+            onClick={() => setCurrentView('crisis')} 
+            icon={<AlertCircle size={20} className="text-red-500" />} 
+            label="Crisis Mode" 
           />
         </nav>
 
@@ -497,6 +534,27 @@ function NavButton({ active, onClick, icon, label }: { active: boolean, onClick:
 function DashboardView({ moodLogs, result, setView, profile, setModalInfo }: any) {
   return (
     <div className="grid grid-cols-12 gap-4 md:gap-8">
+      {/* Quick Crisis Access for low-energy states */}
+      <div className="col-span-12">
+        <div className="bg-red-50 border-l-4 border-red-600 p-4 rounded-r-2xl flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-200">
+              <Zap size={20} />
+            </div>
+            <div>
+              <h4 className="font-black text-slate-900 uppercase text-[10px] tracking-widest">In Distress?</h4>
+              <p className="text-xs text-slate-600 font-medium">If you find it too hard to use the trackers right now, tap for immediate support.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setView('crisis')}
+            className="px-6 py-2 bg-red-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-100 whitespace-nowrap"
+          >
+            Get Help Now
+          </button>
+        </div>
+      </div>
+
       {/* Main Column */}
       <div className="col-span-12 lg:col-span-8 flex flex-col gap-4 md:gap-8">
         
@@ -979,6 +1037,8 @@ function ResourcesView({ setModalInfo, onBack }: { setModalInfo: (info: { title:
 function ProfileEditView({ profile, userId, onBack }: { profile: any, userId: string, onBack: () => void }) {
   const [name, setName] = useState(profile?.name || '');
   const [age, setAge] = useState(profile?.age?.toString() || '');
+  const [partnerName, setPartnerName] = useState(profile?.wellnessPartnerName || '');
+  const [partnerEmail, setPartnerEmail] = useState(profile?.wellnessPartnerEmail || '');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -994,6 +1054,8 @@ function ProfileEditView({ profile, userId, onBack }: { profile: any, userId: st
       await setDoc(doc(db, path), {
         name,
         age: parsedAge,
+        wellnessPartnerName: partnerName,
+        wellnessPartnerEmail: partnerEmail,
         updatedAt: serverTimestamp()
       }, { merge: true });
       onBack();
@@ -1014,26 +1076,54 @@ function ProfileEditView({ profile, userId, onBack }: { profile: any, userId: st
         <p className="text-slate-500 font-medium italic">Update your information for personalized tracking.</p>
       </section>
 
-      <div className="space-y-6">
-        <div className="space-y-3">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Display Name</label>
-          <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="input-field py-4 px-6 text-lg font-bold"
-          />
+      <div className="space-y-8">
+        <div className="space-y-6">
+          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] border-b border-slate-100 pb-2">Basic Information</h3>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Display Name</label>
+            <input 
+              type="text" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="input-field py-4 px-6 text-lg font-bold"
+            />
+          </div>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Age (15-35)</label>
+            <input 
+              type="number" 
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              className="input-field py-4 px-6 text-lg font-bold"
+              min="15"
+              max="35"
+            />
+          </div>
         </div>
-        <div className="space-y-3">
-          <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Age (15-35)</label>
-          <input 
-            type="number" 
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            className="input-field py-4 px-6 text-lg font-bold"
-            min="15"
-            max="35"
-          />
+
+        <div className="space-y-6">
+          <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] border-b border-slate-100 pb-2">Wellness Partner (Optional)</h3>
+          <p className="text-xs text-slate-500 font-medium">Add a trusted contact who can be notified or access your state in a crisis.</p>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Partner Name</label>
+            <input 
+              type="text" 
+              value={partnerName}
+              onChange={(e) => setPartnerName(e.target.value)}
+              placeholder="e.g. Next of Kin, Close Friend"
+              className="input-field py-4 px-6 text-lg font-bold"
+            />
+          </div>
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Partner Email</label>
+            <input 
+              type="email" 
+              value={partnerEmail}
+              onChange={(e) => setPartnerEmail(e.target.value)}
+              placeholder="partner@example.com"
+              className="input-field py-4 px-6 text-lg font-bold"
+            />
+          </div>
         </div>
       </div>
 
@@ -1044,6 +1134,123 @@ function ProfileEditView({ profile, userId, onBack }: { profile: any, userId: st
       >
         {saving ? 'Updating Profile...' : 'Save Changes'}
       </button>
+    </div>
+  );
+}
+
+function CrisisView({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="max-w-3xl mx-auto space-y-12">
+      <section>
+        <button onClick={onBack} className="text-slate-400 mb-6 hover:text-slate-600 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+          <ChevronRight className="rotate-180" size={16} /> Back to Dashboard
+        </button>
+        <div className="flex items-center gap-4 mb-2">
+          <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-red-100">
+            <AlertCircle size={24} />
+          </div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Crisis Support</h1>
+        </div>
+        <p className="text-slate-500 font-medium italic text-lg">You don't have to carry this alone. Please reach out to one of these verified resources now.</p>
+      </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <section className="space-y-6">
+          <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] px-1">Emergency Calls</h3>
+          <div className="space-y-4">
+            {HELPLINES.map(h => (
+              <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="wellness-card bg-red-50/30 border-red-100/50 flex items-center justify-between hover:bg-red-50 group transition-all">
+                <div className="space-y-1">
+                  <h4 className="font-black text-slate-900 uppercase tracking-tighter">{h.name}</h4>
+                  <p className="text-sm text-red-600 font-bold tracking-tighter">{h.number}</p>
+                </div>
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-all">
+                  <Phone size={20} />
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-6">
+          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] px-1">Instant Actions</h3>
+          <div className="space-y-4">
+            <div className="wellness-card border-blue-100 bg-blue-50/10">
+              <h4 className="font-black text-slate-900 uppercase text-xs tracking-tight mb-3">Distress Protocol</h4>
+              <ul className="space-y-3">
+                <li className="flex gap-3 text-sm font-medium text-slate-600">
+                  <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                  Focus on your breathing. Slowly in through your nose, hold for 4, out through your mouth.
+                </li>
+                <li className="flex gap-3 text-sm font-medium text-slate-600">
+                  <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                  Ground yourself. Identify 5 things you can see, 4 things you can touch, 3 things you can hear.
+                </li>
+                <li className="flex gap-3 text-sm font-medium text-slate-600">
+                  <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                  Call a friend or family member if you feel comfortable. Just say "I'm having a hard time."
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-slate-900 p-6 rounded-3xl text-white">
+              <h4 className="font-black uppercase text-[10px] tracking-widest text-blue-400 mb-2">Note on Fatigue</h4>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                If you feel too physically sick or exhausted to talk, it's okay to just rest. The trackers can wait. Your immediate safety and comfort are what matters most right now.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function CrisisOverlay({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-6 overflow-y-auto">
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="bg-white rounded-[40px] w-full max-w-2xl p-8 md:p-12 shadow-2xl relative"
+      >
+        <button 
+          onClick={onClose}
+          className="absolute right-8 top-8 p-3 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
+        >
+          <Plus className="rotate-45" size={24} />
+        </button>
+
+        <div className="text-center mb-12">
+          <div className="w-20 h-20 bg-red-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-red-200">
+            <AlertCircle size={40} />
+          </div>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase mb-4">Emergency Support</h2>
+          <p className="text-slate-500 font-medium max-w-sm mx-auto">Verified Nigerian helplines available 24/7. Your wellbeing is the priority.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+          {HELPLINES.map(h => (
+            <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:bg-red-50 hover:border-red-100 transition-all group">
+              <div>
+                <h4 className="font-black text-slate-900 uppercase text-xs tracking-tight">{h.name}</h4>
+                <p className="text-lg font-black text-red-600 tracking-tighter mt-1">{h.number}</p>
+              </div>
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-red-600 group-hover:text-white shadow-sm transition-all">
+                <Phone size={20} />
+              </div>
+            </a>
+          ))}
+        </div>
+
+        <button 
+          onClick={onClose}
+          className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-slate-800 transition-colors"
+        >
+          Return to Login
+        </button>
+      </motion.div>
     </div>
   );
 }
