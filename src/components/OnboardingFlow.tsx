@@ -121,10 +121,10 @@ export function OnboardingFlow({ onComplete, initialName, onCancel }: Onboarding
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white dark:bg-[#131B2E] text-slate-900 dark:text-slate-100 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-2xl p-6 md:p-8 w-full max-w-lg space-y-6 max-h-[95vh] overflow-y-auto"
+        className="bg-white dark:bg-[#203038] text-slate-900 dark:text-slate-100 rounded-[32px] border border-slate-100 dark:border-[#2C414C] shadow-2xl p-6 md:p-8 w-full max-w-lg space-y-6 max-h-[95vh] overflow-y-auto"
       >
         {/* Header toolbar */}
-        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-100/60 dark:border-slate-800">
+        <div className="flex justify-between items-center bg-slate-50 dark:bg-[#18262C] p-3 rounded-2xl border border-slate-100/60 dark:border-[#2C414C]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
               <Sparkles size={16} />
@@ -365,7 +365,7 @@ export function OnboardingFlow({ onComplete, initialName, onCancel }: Onboarding
                   const currentVal = baselineAnswers[q.id] || 0;
                   const textLabel = q.text;
                   return (
-                    <div key={q.id} className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 rounded-2xl space-y-2">
+                    <div key={q.id} className="p-4 bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] rounded-2xl space-y-2">
                       <p className="text-xs font-black text-slate-800 dark:text-slate-100 leading-snug flex items-center justify-between gap-2">
                         <span>{idx + 1}. {textLabel}</span>
                         <button
@@ -388,7 +388,7 @@ export function OnboardingFlow({ onComplete, initialName, onCancel }: Onboarding
                               className={`py-2 px-3 text-[10px] rounded-xl font-bold border text-left transition-all cursor-pointer ${
                                 currentVal === opt.value
                                   ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
-                                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                                  : 'bg-white dark:bg-[#203038] border-slate-200 dark:border-[#2C414C] text-slate-500 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-[#2a3c46]'
                               }`}
                             >
                               {optionLabel}

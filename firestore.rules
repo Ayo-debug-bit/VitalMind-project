@@ -45,11 +45,10 @@ service cloud.firestore {
     // --- Users Collection ---
     match /users/{userId} {
       function isValidUser(data) {
-        return data.keys().hasAll(['uid', 'email'])
-            && data.uid == request.auth.uid
+        return (data.get('uid', null) == null || data.uid == request.auth.uid)
             && (data.get('name', null) == null || (data.name is string && data.name.size() <= 100))
-            && data.email is string && data.email.size() <= 100
-            && (data.get('age', 0) is number)
+            && (data.get('email', null) == null || (data.email is string && data.email.size() <= 100))
+            && (data.get('age', null) == null || (data.age is number))
             && (data.get('username', null) == null || (data.username is string && data.username.size() <= 100))
             && (data.get('securityQuestion', null) == null || (data.securityQuestion is string && data.securityQuestion.size() <= 200))
             && (data.get('securityAnswer', null) == null || (data.securityAnswer is string && data.securityAnswer.size() <= 100))
@@ -67,12 +66,14 @@ service cloud.firestore {
       }
 
       allow read: if isOwner(userId);
-      allow create: if isOwner(userId) && isValidUser(incoming()) 
+      allow create: if isOwner(userId) 
+                    && incoming().keys().hasAll(['uid', 'email'])
+                    && isValidUser(incoming()) 
                     && (incoming().get('createdAt', request.time) == request.time);
       allow update: if isOwner(userId)
                     && isValidUser(incoming())
-                    && incoming().uid == existing().uid
-                    && incoming().email == existing().email
+                    && (incoming().get('uid', existing().uid) == existing().uid)
+                    && (incoming().get('email', existing().email) == existing().email)
                     && (incoming().get('createdAt', existing().get('createdAt', request.time)) == existing().get('createdAt', request.time))
                     && (incoming().diff(existing()).affectedKeys().hasOnly([
                       'uid', 'email', 'name', 'age', 'lastState', 'updatedAt', 'createdAt',
@@ -124,7 +125,8 @@ service cloud.firestore {
             && data.name is string && data.name.size() <= 100
             && data.phone is string && data.phone.size() <= 100
             && data.relationship is string && data.relationship.size() <= 100
-            && data.createdAt is string && data.createdAt.size() <= 50;
+            && data.createdAt is string && data.createdAt.size() <= 50
+            && (data.get('email', '') is string && data.get('email', '').size() <= 100);
       }
 
       allow read: if isOwner(userId);

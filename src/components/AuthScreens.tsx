@@ -284,10 +284,10 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
       <div className="w-full max-w-md relative z-10 flex flex-col items-center py-4">
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-5 animate-fadeIn">
-          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-2 shadow-2xl shadow-blue-200 hover:rotate-6 transition-transform">
-            <Heart className="w-7 h-7 text-white fill-white/20" />
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-2xl flex items-center justify-center mb-2 shadow-2xl shadow-blue-500/35 hover:rotate-6 transition-transform">
+            <Heart className="w-7 h-7 text-white fill-white/25" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase">Vital Mind</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">Vital Mind</h1>
         </div>
 
         {/* Dynamic Canvas Container */}

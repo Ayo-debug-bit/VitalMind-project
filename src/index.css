@@ -21,11 +21,11 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-200 font-sans antialiased selection:bg-[#CCFBF1]/80;
+    @apply bg-slate-50 dark:bg-[#131F24] text-slate-900 dark:text-[#E3ECF0] font-sans antialiased selection:bg-[#CCFBF1]/80;
   }
   
   h1, h2, h3, h4 {
-    @apply font-display tracking-tight;
+    @apply font-display tracking-tight text-slate-900 dark:text-white;
   }
 }
 
@@ -35,15 +35,15 @@
 }
 
 .wellness-sidebar-item-active {
-  @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold border-l-4 border-emerald-500 pl-2.5;
+  @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold border-l-4 border-emerald-500 pl-2.5 dark:bg-emerald-500/15;
 }
 
 .wellness-sidebar-item-inactive {
-  @apply text-slate-600 dark:text-slate-400 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white;
+  @apply text-slate-600 dark:text-[#a8b8c0] hover:bg-slate-100/40 dark:hover:bg-[#203038]/60 hover:text-slate-900 dark:hover:text-white;
 }
 
 .wellness-card {
-  @apply bg-white/95 dark:bg-[#131B2E] p-6 rounded-[28px] border border-[#CCFBF1]/50 dark:border-slate-800/80 shadow-md transition-all duration-300 hover:shadow-lg;
+  @apply bg-white/95 dark:bg-[#203038] p-6 rounded-[28px] border border-[#CCFBF1]/50 dark:border-[#2C414C] shadow-md transition-all duration-300 hover:shadow-lg hover:border-[#354D59];
 }
 
 .btn-primary {
@@ -51,11 +51,11 @@
 }
 
 .btn-secondary {
-  @apply bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-slate-50 dark:hover:bg-slate-700/60 active:scale-95 flex items-center justify-center gap-2 cursor-pointer;
+  @apply bg-white dark:bg-[#203038] text-slate-700 dark:text-[#E3ECF0] border border-slate-200 dark:border-[#2C414C] px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-slate-50 dark:hover:bg-[#2a3c46] active:scale-95 flex items-center justify-center gap-2 cursor-pointer;
 }
 
 .input-field {
-  @apply w-full text-xs p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 font-bold transition-all;
+  @apply w-full text-xs p-3.5 bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-800 dark:text-[#E3ECF0] placeholder-slate-400 dark:placeholder-slate-500 font-bold transition-all;
 }
 
 /* Custom dark overrides */

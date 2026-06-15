@@ -280,9 +280,9 @@ function AppContent() {
   }, [medReminders]);
 
   // Additional features mutation helpers
-  const addSafetyContact = async (name: string, phone: string, relationship: string) => {
+  const addSafetyContact = async (name: string, relationship: string, phone: string, email: string = '') => {
     if (!user) return;
-    const newContact = { name, phone, relationship, createdAt: new Date().toISOString() };
+    const newContact = { name, relationship, phone, email, createdAt: new Date().toISOString() };
     if (user.uid === 'guest-user') {
       const updated = [{ id: Math.random().toString(36).substring(2), ...newContact }, ...safetyContacts];
       localStorage.setItem('vitalmind_safety_contacts_guest', JSON.stringify(updated));
@@ -843,17 +843,19 @@ function AppContent() {
   };
 
   return (
-    <div className={`flex h-screen overflow-hidden font-sans transition-all ${theme === 'dark' ? 'dark bg-[#0B0F19] text-slate-100' : 'bg-linear-to-tr from-[#E6F4FE] via-[#F3F8FC] to-[#F9FAFB] text-slate-900'}`}>
+    <div className={`flex h-screen overflow-hidden font-sans transition-all ${theme === 'dark' ? 'dark bg-[#131F24] text-slate-100' : 'bg-linear-to-tr from-[#E6F4FE] via-[#F3F8FC] to-[#F9FAFB] text-slate-900'}`}>
       {/* Sidebar - High Density Design */}
       <aside className={`w-72 border-r flex flex-col hidden lg:flex transition-all ${
         theme === 'dark' 
-          ? 'bg-[#111A2E] border-slate-800/80' 
+          ? 'bg-[#1C2C33] border-[#2C414C]' 
           : 'bg-[#E0F2FE]/40 backdrop-blur-lg border-blue-100'
       }`}>
-        <div className={`p-8 border-b ${theme === 'dark' ? 'border-slate-800' : 'border-[#CCFBF1]/40'}`}>
-          <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400">
-            <div className="w-10 h-10 bg-[#CCFBF1] dark:bg-emerald-500/20 text-[#1474A4] dark:text-[#E0F2FE] rounded-xl flex items-center justify-center font-black text-xl">🌱</div>
-            <h1 className="font-black text-xl tracking-tighter uppercase text-slate-800 dark:text-white">Vital Mind</h1>
+        <div className={`p-8 border-b ${theme === 'dark' ? 'border-[#2C414C]' : 'border-[#CCFBF1]/40'}`}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/10 hover:rotate-6 transition-transform">
+              <Heart className="w-5 h-5 text-white fill-white/20" />
+            </div>
+            <h1 className="font-black text-xl tracking-tighter uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-emerald-400">Vital Mind</h1>
           </div>
         </div>
         
@@ -890,7 +892,7 @@ function AppContent() {
           />
         </nav>
 
-        <div className={`p-6 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-[#CCFBF1]/40'}`}>
+        <div className={`p-6 border-t ${theme === 'dark' ? 'border-[#2C414C]' : 'border-[#CCFBF1]/40'}`}>
           <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group">
             <div className="relative z-10">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Crisis Support</p>
@@ -911,7 +913,7 @@ function AppContent() {
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         <header className={`h-20 border-b px-6 md:px-10 flex items-center justify-between shrink-0 transition-all ${
           theme === 'dark' 
-            ? 'bg-[#101726]/80 backdrop-blur-md border-slate-800 text-white' 
+            ? 'bg-[#131F24]/90 backdrop-blur-md border-[#2C414C] text-white' 
             : 'bg-white/85 backdrop-blur-md border-[#CCFBF1]/40'
         }`}>
           <div>
@@ -924,7 +926,7 @@ function AppContent() {
             <div className="text-right">
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter mb-0.5">Wellness State</p>
               <div className={`px-3 py-1 rounded text-[10px] font-black uppercase ${
-                !wellnessResult ? 'bg-slate-50 dark:bg-slate-900 text-slate-400' :
+                !wellnessResult ? 'bg-slate-50 dark:bg-[#18262C] text-slate-400' :
                 wellnessResult.state === 'Mild' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' :
                 wellnessResult.state === 'Moderate' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400' : 'bg-red-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
               }`}>
@@ -945,7 +947,7 @@ function AppContent() {
                 className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
                   easyMode 
                     ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
-                    : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400'
+                    : 'bg-slate-50 dark:bg-[#18262C] border-slate-200 dark:border-[#2C414C] text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400'
                 }`}
               >
                 <Volume2 size={18} className={easyMode ? 'animate-bounce' : ''} />
@@ -953,14 +955,14 @@ function AppContent() {
               <button 
                 onClick={() => setCurrentView('profile')} 
                 title="Settings & Profile"
-                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
               >
                 <User size={18} />
               </button>
               <button 
                 onClick={() => setShowLogoutConfirm(true)} 
                 title="Log out"
-                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
               >
                 <LogOut size={18} />
               </button>
@@ -968,7 +970,7 @@ function AppContent() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-10">
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 lg:pb-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
@@ -983,9 +985,9 @@ function AppContent() {
           </AnimatePresence>
         </div>
 
-        <footer className={`h-auto md:h-10 border-t px-6 md:px-10 py-4 md:py-0 flex flex-col md:flex-row justify-between items-center text-[10px] font-black uppercase tracking-wider shrink-0 gap-2 transition-all ${
+        <footer className={`h-auto md:h-10 border-t px-6 md:px-10 py-4 md:py-0 flex-col md:flex-row justify-between items-center text-[10px] font-black uppercase tracking-wider shrink-0 gap-2 transition-all hidden lg:flex ${
           theme === 'dark' 
-            ? 'bg-[#101726]/80 text-slate-500 border-slate-800/80' 
+            ? 'bg-[#131F24]/85 text-slate-400 border-[#2C414C]' 
             : 'bg-white/85 text-slate-400 border-[#CCFBF1]/40'
         }`}>
           <div>Vital Mind System • v1.1.0</div>
@@ -1038,10 +1040,15 @@ function AppContent() {
       </AnimatePresence>
 
       {/* Mobile Nav (Bottom) */}
-      <nav className="fixed bottom-0 left-0 right-0 lg:hidden bg-white/80 backdrop-blur-xl border-t border-slate-200 flex justify-around p-4 safe-area-bottom">
-        <NavButton active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} icon={<LayoutDashboard size={22} />} label="Home" />
-        <NavButton active={currentView === 'history'} onClick={() => setCurrentView('history')} icon={<Calendar size={22} />} label="History" />
-        <NavButton active={currentView === 'resources'} onClick={() => setCurrentView('resources')} icon={<BookOpen size={22} />} label="Help" />
+      <nav className={`fixed bottom-0 left-0 right-0 lg:hidden border-t flex justify-around p-3 pb-safe z-50 backdrop-blur-xl transition-all shadow-xl ${
+        theme === 'dark' 
+          ? 'bg-[#1C2C33]/95 border-[#2C414C] text-slate-100' 
+          : 'bg-white/95 border-slate-200 text-slate-900'
+      }`}>
+        <NavButton active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} icon={<LayoutDashboard size={20} />} label="Home" theme={theme} />
+        <NavButton active={currentView === 'mood'} onClick={() => setCurrentView('mood')} icon={<Activity size={21} />} label="Mood" theme={theme} />
+        <NavButton active={currentView === 'history'} onClick={() => setCurrentView('history')} icon={<Calendar size={20} />} label="History" theme={theme} />
+        <NavButton active={currentView === 'resources'} onClick={() => setCurrentView('resources')} icon={<BookOpen size={20} />} label="Help" theme={theme} />
       </nav>
 
       {/* Onboarding Dialog */}
@@ -1184,11 +1191,15 @@ function SidebarItem({ active, onClick, icon, label }: { active: boolean, onClic
   );
 }
 
-function NavButton({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: ReactNode, label: string }) {
+function NavButton({ active, onClick, icon, label, theme }: { active: boolean, onClick: () => void, icon: ReactNode, label: string, theme?: string }) {
+  const activeClass = theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600';
+  const inactiveClass = 'text-slate-400 hover:text-emerald-500 dark:text-slate-500';
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 transition-colors ${active ? 'text-blue-600' : 'text-slate-400'}`}>
-      {icon}
-      <span className="text-[10px] font-black uppercase tracking-wider">{label}</span>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${active ? activeClass : inactiveClass}`}>
+      <div className={`p-1.5 rounded-xl transition-all ${active ? 'scale-110 bg-emerald-500/10 dark:bg-emerald-500/20' : ''}`}>
+        {icon}
+      </div>
+      <span className="text-[9px] font-black uppercase tracking-wider">{label}</span>
     </button>
   );
 }
@@ -1389,7 +1400,7 @@ function DashboardView({
             
             <div className="space-y-4">
               {result?.recommendations.map((rec: string, i: number) => (
-                <div key={i} className="flex gap-4 items-start p-5 bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 rounded-2xl">
+                <div key={i} className="flex gap-4 items-start p-5 bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] rounded-2xl">
                   <CheckCircle2 size={20} className="text-blue-500 shrink-0 mt-0.5" />
                   <div className="flex-1 space-y-2">
                     <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 leading-relaxed">{rec}</p>
@@ -1397,7 +1408,7 @@ function DashboardView({
                       <button 
                         type="button"
                         onClick={() => speakText(rec)}
-                        className="p-1 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition-all"
+                        className="p-1 px-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#203038] dark:hover:bg-[#2a3c46] text-slate-500 dark:text-slate-400 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition-all"
                       >
                         <Volume2 size={12} /> Read aloud
                       </button>
@@ -1411,7 +1422,7 @@ function DashboardView({
             </div>
           </section>
 
-          <section className="wellness-card border-blue-105/50 dark:border-slate-800 bg-blue-50/20 dark:bg-blue-950/10">
+          <section className="wellness-card border-blue-105/50 dark:border-[#2C414C] bg-blue-50/20 dark:bg-blue-950/10">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-[12px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-3">
                 <Heart size={18} className="text-blue-500" />
@@ -1430,7 +1441,7 @@ function DashboardView({
             
             <div className="space-y-4">
               {result?.preventiveTips.map((tip: string, i: number) => (
-                <div key={i} className="flex gap-4 items-start p-5 bg-white dark:bg-slate-900/60 border border-blue-100/50 dark:border-slate-800 rounded-2xl shadow-xs">
+                <div key={i} className="flex gap-4 items-start p-5 bg-white dark:bg-[#18262C] border border-blue-100/50 dark:border-[#2C414C] rounded-2xl shadow-xs">
                   <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                     <CheckCircle2 size={12} className="text-white" />
                   </div>
@@ -1782,19 +1793,19 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
             className={`flex flex-col items-center justify-center p-6 rounded-[28px] transition-all border text-center cursor-pointer ${
               selectedMoods.includes(m.type) 
                 ? `${m.color} border-current ring-4 ring-emerald-500/10 scale-102 font-bold shadow-md` 
-                : 'bg-white dark:bg-[#131B2E] text-slate-400 dark:text-slate-500 border-[#CCFBF1]/40 dark:border-slate-800/80 shadow-xs hover:scale-[1.02] hover:bg-slate-50/50 dark:hover:bg-slate-800/45'
+                : 'bg-white dark:bg-[#1C2C33] text-slate-400 dark:text-[#a8b8c0] border-[#CCFBF1]/40 dark:border-[#2C414C] shadow-xs hover:scale-[1.02] hover:bg-slate-50/50 dark:hover:bg-[#1C2C33]/60'
             }`}
             style={{ minHeight: '120px' }}
           >
             <span className="text-4xl mb-3">{m.emoji}</span>
             <span className="text-[10px] font-black uppercase tracking-widest block">{m.type}</span>
-            <span className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-medium hidden sm:block">{m.desc}</span>
+            <span className="text-[9px] text-slate-400 dark:text-[#a8b8c0] mt-1 font-medium hidden sm:block">{m.desc}</span>
           </button>
         ))}
       </div>
 
       {/* Sleep & Energy Tracker sliders */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/70 dark:bg-[#131B2E] p-6 rounded-[28px] border border-[#CCFBF1]/50 dark:border-slate-800">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/70 dark:bg-[#1C2C33] p-6 rounded-[28px] border border-[#CCFBF1]/50 dark:border-[#2C414C]">
         <div className="space-y-3">
           <div className="flex justify-between items-center pr-1">
             <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">Sleep Quality last night</span>
@@ -1844,7 +1855,7 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
                 const combined = note ? `${note}\n${p}` : p;
                 setNote(combined);
               }}
-              className="px-3.5 py-2 bg-white dark:bg-[#131B2E] hover:bg-slate-50 dark:hover:bg-slate-800 text-[10px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200/80 dark:border-slate-800 rounded-xl transition-all font-bold text-left shadow-xs cursor-pointer truncate max-w-sm"
+              className="px-3.5 py-2 bg-white dark:bg-[#203038] hover:bg-slate-50 dark:hover:bg-[#2a3c46] text-[10px] text-slate-600 dark:text-[#a8b8c0] hover:text-slate-900 dark:hover:text-white border border-slate-200/80 dark:border-[#2C414C] rounded-xl transition-all font-bold text-left shadow-xs cursor-pointer truncate max-w-sm"
             >
               🌱 {p}
             </button>
@@ -2824,8 +2835,8 @@ function ProfileEditView({
       <div className="space-y-10">
 
         {/* Theme Settings Selection */}
-        <div className="bg-white/95 dark:bg-[#131B2E] border border-[#CCFBF1]/50 dark:border-slate-800 p-6 rounded-[28px] space-y-4 shadow-xs">
-          <h3 className="text-[10px] font-black text-[#10B981] dark:text-[#E0F2FE] uppercase tracking-[0.3em] border-b border-slate-50 dark:border-slate-800 pb-2">Appearance theme</h3>
+        <div className="bg-white/95 dark:bg-[#203038] border border-[#CCFBF1]/50 dark:border-[#2C414C] p-6 rounded-[28px] space-y-4 shadow-xs">
+          <h3 className="text-[10px] font-black text-[#10B981] dark:text-[#E0F2FE] uppercase tracking-[0.3em] border-b border-slate-50 dark:border-[#2C414C] pb-2">Appearance theme</h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold">Tweak application color configuration for an elegant tracking experience.</p>
           <div className="grid grid-cols-2 gap-4">
             <button
@@ -2834,7 +2845,7 @@ function ProfileEditView({
               className={`p-4 rounded-2xl border transition-all text-left flex flex-col justify-between h-24 cursor-pointer ${
                 theme === 'light' 
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-600 dark:border-emerald-500 text-emerald-800 dark:text-emerald-400' 
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 border-slate-200 dark:border-slate-800'
+                  : 'bg-white dark:bg-[#18262C] text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#203038]/60 border-slate-200 dark:border-[#2C414C]'
               }`}
             >
               <span className="text-xl">☀️</span>
@@ -2849,7 +2860,7 @@ function ProfileEditView({
               className={`p-4 rounded-2xl border transition-all text-left flex flex-col justify-between h-24 cursor-pointer ${
                 theme === 'dark' 
                   ? 'bg-emerald-500/10 dark:bg-emerald-500/20 border-emerald-600 dark:border-emerald-500 text-emerald-800 dark:text-emerald-400' 
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850 border-slate-200 dark:border-slate-800'
+                  : 'bg-white dark:bg-[#18262C] text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-[#203038]/60 border-slate-200 dark:border-[#2C414C]'
               }`}
             >
               <span className="text-xl">🌙</span>
@@ -2862,8 +2873,8 @@ function ProfileEditView({
         </div>
 
         {/* Language Settings Selection */}
-        <div className="bg-white/95 dark:bg-[#131B2E] border border-slate-100 dark:border-slate-800 p-6 rounded-[28px] space-y-4 shadow-xs">
-          <h3 className="text-[10px] font-black text-blue-600 dark:text-[#E0F2FE] uppercase tracking-[0.3em] border-b border-slate-50 dark:border-slate-800 pb-2 flex items-center gap-1.5 justify-start">
+        <div className="bg-white/95 dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] p-6 rounded-[28px] space-y-4 shadow-xs">
+          <h3 className="text-[10px] font-black text-blue-600 dark:text-[#E0F2FE] uppercase tracking-[0.3em] border-b border-slate-50 dark:border-[#2C414C] pb-2 flex items-center gap-1.5 justify-start">
             🌐 Selection of language
           </h3>
           <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold">Select your preferred accent context for the wellness assistant and notifications.</p>
@@ -3006,7 +3017,7 @@ function ProfileEditView({
                       👤
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-xs text-slate-900">{con.contactName}</h4>
+                      <h4 className="font-extrabold text-xs text-slate-900">{con.name || con.contactName || 'Safety Companion'}</h4>
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">{con.relationship} — {con.phone}</p>
                       {con.email && <span className="text-[9px] text-slate-500 font-mono italic leading-none">{con.email}</span>}
                     </div>
@@ -3234,14 +3245,15 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {safetyContacts.map(con => {
-              const silentSmsBody = encodeURIComponent(`Hi ${con.contactName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from VitalMind)`);
+              const displayName = con.name || con.contactName || 'Safety Companion';
+              const silentSmsBody = encodeURIComponent(`Hi ${displayName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from VitalMind)`);
               return (
                 <div key={con.id} className="bg-white border border-red-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
                   <div>
                     <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-50 border border-red-100 px-2 py-0.5 rounded-md">
                       {con.relationship}
                     </span>
-                    <h4 className="font-extrabold text-slate-900 text-sm mt-2">{con.contactName}</h4>
+                    <h4 className="font-extrabold text-slate-900 text-sm mt-2">{displayName}</h4>
                     <p className="text-xs text-slate-500 font-mono mt-0.5">{con.phone}</p>
                   </div>
 
