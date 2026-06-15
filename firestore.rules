@@ -27,6 +27,21 @@ service cloud.firestore {
       return resource.data;
     }
 
+    // --- Usernames Collection (Uniqueness Map) ---
+    match /usernames/{username} {
+      function isValidUsername(data) {
+        return data.keys().hasAll(['uid', 'email'])
+            && data.uid is string
+            && data.email is string
+            && (data.get('securityQuestion', null) == null || (data.securityQuestion is string && data.securityQuestion.size() <= 200))
+            && (data.get('hashedAnswer', null) == null || (data.hashedAnswer is string && data.hashedAnswer.size() <= 100));
+      }
+      
+      allow get: if true;
+      allow create: if isSignedIn() && incoming().uid == request.auth.uid && isValidUsername(incoming());
+      allow update: if isSignedIn() && existing().uid == request.auth.uid && incoming().uid == request.auth.uid && isValidUsername(incoming());
+    }
+
     // --- Users Collection ---
     match /users/{userId} {
       function isValidUser(data) {
@@ -34,16 +49,38 @@ service cloud.firestore {
             && data.uid == request.auth.uid
             && (data.get('name', null) == null || (data.name is string && data.name.size() <= 100))
             && data.email is string && data.email.size() <= 100
-            && (data.get('age', 0) is int);
+            && (data.get('age', 0) is number)
+            && (data.get('username', null) == null || (data.username is string && data.username.size() <= 100))
+            && (data.get('securityQuestion', null) == null || (data.securityQuestion is string && data.securityQuestion.size() <= 200))
+            && (data.get('securityAnswer', null) == null || (data.securityAnswer is string && data.securityAnswer.size() <= 100))
+            && (data.get('reminderEnabled', null) == null || (data.reminderEnabled is bool))
+            && (data.get('reminderTime', null) == null || (data.reminderTime is string && data.reminderTime.size() <= 10))
+            && (data.get('wellnessPartnerName', null) == null || (data.wellnessPartnerName is string && data.wellnessPartnerName.size() <= 100))
+            && (data.get('wellnessPartnerEmail', null) == null || (data.wellnessPartnerEmail is string && data.wellnessPartnerEmail.size() <= 100))
+            && (data.get('locale', null) == null || (data.locale is string && data.locale.size() <= 20))
+            && (data.get('theme', null) == null || (data.theme is string && data.theme.size() <= 20))
+            && (data.get('lastState', null) == null || (data.lastState is string && data.lastState.size() <= 100))
+            && (data.get('baselineAnswers', null) == null || (data.baselineAnswers is map))
+            && (data.get('baselineScore', null) == null || (data.baselineScore is number))
+            && (data.get('createdAt', null) == null || (data.createdAt is timestamp))
+            && (data.get('updatedAt', null) == null || (data.updatedAt is timestamp));
       }
 
       allow read: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming()) 
                     && (incoming().get('createdAt', request.time) == request.time);
       allow update: if isOwner(userId)
+                    && isValidUser(incoming())
                     && incoming().uid == existing().uid
+                    && incoming().email == existing().email
                     && (incoming().get('createdAt', existing().get('createdAt', request.time)) == existing().get('createdAt', request.time))
-                    && (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'age', 'lastState', 'updatedAt', 'createdAt']));
+                    && (incoming().diff(existing()).affectedKeys().hasOnly([
+                      'uid', 'email', 'name', 'age', 'lastState', 'updatedAt', 'createdAt',
+                      'username', 'securityQuestion', 'securityAnswer',
+                      'reminderEnabled', 'reminderTime',
+                      'wellnessPartnerName', 'wellnessPartnerEmail',
+                      'locale', 'theme', 'baselineAnswers', 'baselineScore'
+                    ]));
     }
 
     // --- Mood Logs ---
@@ -51,8 +88,11 @@ service cloud.firestore {
       function isValidMood(data) {
         return data.keys().hasAll(['userId', 'mood', 'timestamp'])
             && data.userId == userId
-            && data.mood in ['Happy', 'Sad', 'Stressed', 'Anxious', 'Neutral', 'Angry']
-            && (data.get('note', '') is string && data.get('note', '').size() <= 500);
+            && data.mood in ['Happy', 'Hopeful', 'Calm', 'Neutral', 'Sad', 'Tired', 'Lonely', 'Dissociated', 'Stressed', 'Anxious', 'Angry', 'Fearful']
+            && (data.get('note', '') is string && data.get('note', '').size() <= 1000)
+            && (data.get('sleepScore', 0) is number)
+            && (data.get('energyScore', 0) is number)
+            && (data.get('moods', []) is list);
       }
 
       allow list: if isOwner(userId);
@@ -75,6 +115,60 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow create: if isOwner(userId) && isValidSymptom(incoming()) && incoming().timestamp == request.time;
       allow delete: if isOwner(userId);
+    }
+
+    // --- Safety Contacts ---
+    match /users/{userId}/safety_contacts/{contactId} {
+      function isValidSafetyContact(data) {
+        return data.keys().hasAll(['name', 'phone', 'relationship', 'createdAt'])
+            && data.name is string && data.name.size() <= 100
+            && data.phone is string && data.phone.size() <= 100
+            && data.relationship is string && data.relationship.size() <= 100
+            && data.createdAt is string && data.createdAt.size() <= 50;
+      }
+
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidSafetyContact(incoming());
+      allow delete: if isOwner(userId);
+    }
+
+    // --- Doctor Appointments ---
+    match /users/{userId}/doctor_appointments/{appointmentId} {
+      function isValidDoctorAppointment(data) {
+        return data.keys().hasAll(['doctorName', 'dateTime', 'completed', 'createdAt'])
+            && data.doctorName is string && data.doctorName.size() <= 100
+            && data.dateTime is string && data.dateTime.size() <= 100
+            && data.completed is bool
+            && (data.get('discussedNotes', '') is string && data.get('discussedNotes', '').size() <= 1000)
+            && (data.get('clinicalAdvice', '') is string && data.get('clinicalAdvice', '').size() <= 1000)
+            && data.createdAt is string && data.createdAt.size() <= 50;
+      }
+
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidDoctorAppointment(incoming());
+      allow delete: if isOwner(userId);
+    }
+
+    // --- Medication Reminders ---
+    match /users/{userId}/medication_reminders/{reminderId} {
+      function isValidMedicationReminder(data) {
+        return data.keys().hasAll(['medicationName', 'dosage', 'timeOfDay', 'enabled'])
+            && data.medicationName is string && data.medicationName.size() <= 100
+            && data.dosage is string && data.dosage.size() <= 100
+            && data.timeOfDay is string && data.timeOfDay.size() <= 10
+            && data.enabled is bool;
+      }
+
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidMedicationReminder(incoming());
+      allow update: if isOwner(userId) && isValidMedicationReminder(incoming())
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['enabled']);
+      allow delete: if isOwner(userId);
+    }
+
+    // --- Test Connection Path ---
+    match /test/connection {
+      allow read: if true;
     }
   }
 }

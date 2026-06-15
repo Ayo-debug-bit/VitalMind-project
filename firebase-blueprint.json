@@ -8,11 +8,33 @@
         "uid": { "type": "string" },
         "name": { "type": "string" },
         "email": { "type": "string" },
+        "username": { "type": "string" },
         "age": { "type": "integer" },
+        "securityQuestion": { "type": "string" },
+        "securityAnswer": { "type": "string" },
+        "reminderEnabled": { "type": "boolean" },
+        "reminderTime": { "type": "string" },
+        "wellnessPartnerName": { "type": "string" },
+        "wellnessPartnerEmail": { "type": "string" },
+        "locale": { "type": "string" },
+        "theme": { "type": "string" },
+        "baselineAnswers": { "type": "object" },
+        "baselineScore": { "type": "integer" },
+        "lastState": { "type": "string", "enum": ["Mild", "Moderate", "Severe"] },
         "createdAt": { "type": "string", "format": "date-time" },
-        "lastState": { "type": "string", "enum": ["Mild", "Moderate", "Severe"] }
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "name", "email", "createdAt"]
+    },
+    "Username": {
+      "title": "Username Mapping",
+      "description": "Unique mapping of usernames to user UIDs",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "required": ["uid", "email"]
     },
     "MoodLog": {
       "title": "Mood Log",
@@ -20,8 +42,11 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
-        "mood": { "type": "string", "enum": ["Happy", "Sad", "Stressed", "Anxious", "Neutral", "Angry"] },
+        "mood": { "type": "string", "enum": ["Happy", "Hopeful", "Calm", "Neutral", "Sad", "Tired", "Lonely", "Dissociated", "Stressed", "Anxious", "Angry", "Fearful"] },
+        "moods": { "type": "array", "items": { "type": "string" } },
         "note": { "type": "string" },
+        "sleepScore": { "type": "integer" },
+        "energyScore": { "type": "integer" },
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "mood", "timestamp"]
@@ -36,9 +61,51 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "symptoms", "timestamp"]
+    },
+    "SafetyContact": {
+      "title": "Safety Contact",
+      "description": "User trusted contacts for safety networks",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "relationship": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "relationship", "createdAt"]
+    },
+    "DoctorAppointment": {
+      "title": "Doctor Appointment",
+      "description": "Information about upcoming doctor appointments and clinical advice",
+      "type": "object",
+      "properties": {
+        "doctorName": { "type": "string" },
+        "dateTime": { "type": "string" },
+        "discussedNotes": { "type": "string" },
+        "clinicalAdvice": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["doctorName", "dateTime", "completed", "createdAt"]
+    },
+    "MedicationReminder": {
+      "title": "Medication Reminder",
+      "description": "Scheduled reminders for taking prescribed medication",
+      "type": "object",
+      "properties": {
+        "medicationName": { "type": "string" },
+        "dosage": { "type": "string" },
+        "timeOfDay": { "type": "string" },
+        "enabled": { "type": "boolean" }
+      },
+      "required": ["medicationName", "dosage", "timeOfDay", "enabled"]
     }
   },
   "firestore": {
+    "usernames/{username}": {
+      "schema": "Username",
+      "description": "Unique registered usernames"
+    },
     "users/{userId}": {
       "schema": "User",
       "description": "User profiles"
@@ -50,6 +117,18 @@
     "users/{userId}/symptom_logs/{logId}": {
       "schema": "SymptomLog",
       "description": "Collection of symptom logs per user"
+    },
+    "users/{userId}/safety_contacts/{contactId}": {
+      "schema": "SafetyContact",
+      "description": "Collection of trusted safety contacts per user"
+    },
+    "users/{userId}/doctor_appointments/{appointmentId}": {
+      "schema": "DoctorAppointment",
+      "description": "Collection of clinician appointments per user"
+    },
+    "users/{userId}/medication_reminders/{reminderId}": {
+      "schema": "MedicationReminder",
+      "description": "Collection of medication reminders per user"
     }
   }
 }

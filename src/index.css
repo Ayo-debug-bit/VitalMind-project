@@ -1,64 +1,64 @@
 @import "tailwindcss";
 
-@theme {
-  --color-slate-50: #f8fafc;
-  --color-slate-100: #f1f5f9;
-  --color-slate-200: #e2e8f0;
-  --color-slate-300: #cbd5e1;
-  --color-slate-400: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-600: #475569;
-  --color-slate-700: #334155;
-  --color-slate-800: #1e293b;
-  --color-slate-900: #0f172a;
-  
-  --color-blue-50: #eff6ff;
-  --color-blue-100: #dbeafe;
-  --color-blue-200: #bfdbfe;
-  --color-blue-300: #93c5fd;
-  --color-blue-400: #60a5fa;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #2563eb;
-  --color-blue-700: #1d4ed8;
-  
-  --color-emerald-50: #ecfdf5;
-  --color-emerald-600: #059669;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-  --shadow-wellness: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Custom palette matching user's exact colors */
+  --color-[#E0F2FE]: #E0F2FE;
+  --color-[#CCFBF1]: #CCFBF1;
+  --color-calm-green: #10B981;
+  --color-warm-orange: #F97316;
+  --color-soft-red: #EF4444;
+
+  --shadow-wellness: 0 10px 30px -10px rgba(16, 185, 129, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 2px 8px -3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.04);
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-200 font-sans antialiased selection:bg-[#CCFBF1]/80;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
   }
 }
 
+/* Custom UI Items */
 .wellness-sidebar-item {
-  @apply flex items-center gap-3 p-3 text-sm font-medium rounded-lg transition-colors cursor-pointer;
+  @apply flex items-center gap-3.5 p-3 text-xs font-bold rounded-2xl transition-all cursor-pointer select-none tracking-wide uppercase;
 }
 
 .wellness-sidebar-item-active {
-  @apply bg-blue-50 text-blue-700;
+  @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold border-l-4 border-emerald-500 pl-2.5;
 }
 
 .wellness-sidebar-item-inactive {
-  @apply text-slate-600 hover:bg-slate-50;
+  @apply text-slate-600 dark:text-slate-400 hover:bg-slate-100/40 dark:hover:bg-slate-800/40 hover:text-slate-900 dark:hover:text-white;
 }
 
 .wellness-card {
-  @apply bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all;
+  @apply bg-white/95 dark:bg-[#131B2E] p-6 rounded-[28px] border border-[#CCFBF1]/50 dark:border-slate-800/80 shadow-md transition-all duration-300 hover:shadow-lg;
 }
 
 .btn-primary {
-  @apply bg-blue-600 text-white px-5 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2;
+  @apply bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-95 disabled:opacity-45 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-emerald-500/10;
 }
 
 .btn-secondary {
-  @apply bg-white text-slate-700 border border-slate-200 px-5 py-2.5 rounded-lg font-bold text-sm transition-all hover:bg-slate-50 active:scale-95 flex items-center justify-center gap-2;
+  @apply bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-slate-50 dark:hover:bg-slate-700/60 active:scale-95 flex items-center justify-center gap-2 cursor-pointer;
 }
 
 .input-field {
-  @apply w-full text-sm p-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500;
+  @apply w-full text-xs p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 font-bold transition-all;
+}
+
+/* Custom dark overrides */
+.dark ::-webkit-calendar-picker-indicator {
+  filter: invert(1);
 }

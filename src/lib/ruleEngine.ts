@@ -3,7 +3,20 @@
  * Strictly IF-THEN logic as per specifications.
  */
 
-export type MoodType = "Happy" | "Sad" | "Stressed" | "Anxious" | "Neutral" | "Angry";
+export type MoodType = 
+  | "Happy" 
+  | "Sad" 
+  | "Stressed" 
+  | "Anxious" 
+  | "Neutral" 
+  | "Angry"
+  | "Hopeful"
+  | "Calm"
+  | "Tired"
+  | "Lonely"
+  | "Dissociated"
+  | "Fearful";
+
 export type SymptomType = 
   | "Poor sleep" 
   | "Anxiety" 
@@ -16,21 +29,53 @@ export type SymptomType =
   | "Difficulty concentrating"
   | "Social withdrawal"
   | "Excessive worry"
-  | "Irritability";
+  | "Irritability"
+  | "Poor sleep / insomnia"
+  | "Low appetite"
+  | "Racing thoughts"
+  | "Memory issues"
+  | "Mood swings"
+  | "Feeling detached from reality"
+  | "Suicidal thoughts"
+  | "Self-harm urges"
+  | "Overeating"
+  | "Dizziness"
+  | "Chest tightness"
+  | "Shortness of breath"
+  | "Palpitations"
+  | "Physical pain"
+  | "Frequent urination"
+  | "Trembling or shaking";
 
 export const SYMPTOMS: SymptomType[] = [
-  "Poor sleep",
-  "Anxiety",
-  "Fatigue",
-  "Loss of appetite",
-  "Low motivation",
-  "Headache",
-  "Muscle tension",
-  "Digital eye strain",
+  "Racing thoughts",
   "Difficulty concentrating",
-  "Social withdrawal",
+  "Memory issues",
+  "Low motivation",
   "Excessive worry",
-  "Irritability"
+  "Mood swings",
+  "Feeling detached from reality",
+  "Suicidal thoughts",
+  "Self-harm urges",
+  "Anxiety",
+  "Social withdrawal",
+  "Irritability",
+  "Headache",
+  "Poor sleep / insomnia",
+  "Poor sleep", // compat
+  "Fatigue",
+  "Low appetite",
+  "Loss of appetite", // compat
+  "Overeating",
+  "Dizziness",
+  "Chest tightness",
+  "Shortness of breath",
+  "Palpitations",
+  "Physical pain",
+  "Frequent urination",
+  "Trembling or shaking",
+  "Muscle tension",
+  "Digital eye strain"
 ];
 export type WellnessState = "Mild" | "Moderate" | "Severe";
 
@@ -94,18 +139,26 @@ export function evaluateWellness(
   // Rule 1: IF mood = "Sad" for 3+ consecutive entries → Show warning message
   const consecutiveSad = recentMoods.slice(0, 2).every(m => m === "Sad") && currentMood === "Sad";
   if (consecutiveSad) {
-    warning = "You've been feeling sad for several days. Persistent low mood in young people deserves proactive attention.";
+    warning = "Your logs suggest a persistent low mood. Reflective mapping might help illuminate these trends over time.";
     state = "Moderate";
   }
 
-  // Rule 2: IF symptoms include "Anxiety" + "Poor sleep" → Suggest coping strategies
-  if (selectedSymptoms.includes("Anxiety") && selectedSymptoms.includes("Poor sleep")) {
-    recommendations.push("Anxiety and sleep often affect each other. Consider mindfulness apps or guided meditation.");
+  // Rule 2: IF symptoms include "Anxiety" + "Poor sleep" / "Poor sleep / insomnia" → Suggest coping strategies
+  const hasPoorSleep = selectedSymptoms.includes("Poor sleep") || selectedSymptoms.includes("Poor sleep / insomnia");
+  if ((selectedSymptoms.includes("Anxiety") || selectedSymptoms.includes("Excessive worry")) && hasPoorSleep) {
+    recommendations.push("Your logs suggest an interplay between elevated worry and rest. A consistent wind-down cadence might support deeper recovery.");
     state = "Moderate";
+  }
+
+  // Immediate triggers for clinical-free warm severe guidance
+  if (selectedSymptoms.includes("Suicidal thoughts") || selectedSymptoms.includes("Self-harm urges")) {
+    state = "Severe";
+    warning = "Your logs suggest you are carrying some deep weights. Please remember that you are not alone, and specialized care guides are close at hand.";
+    recommendations.unshift("Navigate to Crisis Support to speak with individuals who care and understand.");
   }
 
   // Rule 3: IF repeated negative mood OR severe symptoms → Trigger alert
-  const negativeMoods = ["Sad", "Stressed", "Anxious", "Angry"];
+  const negativeMoods = ["Sad", "Stressed", "Anxious", "Angry", "Lonely", "Dissociated", "Fearful", "Tired"];
   const negativeFrequency = recentMoods.filter(m => negativeMoods.includes(m)).length + (negativeMoods.includes(currentMood) ? 1 : 0);
   
   if (negativeFrequency >= 5 || selectedSymptoms.length >= 4) {
@@ -114,17 +167,19 @@ export function evaluateWellness(
 
   // General Feedbacks based on state
   if (state === "Mild") {
-    recommendations.push("Practice regular exercise to maintain your mood.");
-    recommendations.push("Ensure you get at least 7-8 hours of sleep tonight.");
-    recommendations.push("Stay hydrated and maintain a healthy diet.");
+    recommendations.push("Practice regular movement or light activity to nourish your mood.");
+    recommendations.push("Ensure you protect time for restful sleep tonight.");
+    recommendations.push("Hydration supports mental clarity and stamina.");
   } else if (state === "Moderate") {
-    recommendations.push("Keep tracking your feelings daily to notice patterns.");
-    recommendations.push("Consider talking to a trusted friend or mentor about how you feel.");
-    recommendations.push("Limit caffeine and screen time before bed.");
+    recommendations.push("Keep mapping your experiences daily to highlight beneficial habits.");
+    recommendations.push("Consider expressing these sentiments to a trusted friend or guide.");
+    recommendations.push("Gently taper screens and active stimuli before heading to bed.");
   } else if (state === "Severe") {
-    recommendations.push("We strongly recommend reaching out to a mental health professional.");
-    recommendations.push("Contact one of the helplines in the Resources section for immediate support.");
-    warning = "Your current state suggests you may need professional support. Please don't go through this alone.";
+    recommendations.push("We recommend exploring specialized guidance from an empathetic care worker.");
+    recommendations.push("Reach out to any of our listed helpline supporters whenever you need a safe branch.");
+    if (!warning) {
+      warning = "Your logs suggest a high level of stress. Caring professional resources can help unpack this safely.";
+    }
   }
 
   return { state, warning, recommendations, preventiveTips };
