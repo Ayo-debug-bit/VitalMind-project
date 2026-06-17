@@ -957,21 +957,23 @@ function AppContent() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className={`h-20 border-b px-6 md:px-10 flex items-center justify-between shrink-0 transition-all ${
+        <header className={`min-h-[5rem] h-auto py-3 border-b px-4 sm:px-6 md:px-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 transition-all ${
           theme === 'dark' 
             ? 'bg-[#131F24]/90 backdrop-blur-md border-[#2C414C] text-white' 
             : 'bg-white/85 backdrop-blur-md border-[#CCFBF1]/40'
         }`}>
-          <div>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">{t.welcome}, {user.displayName?.split(' ')[0]} 👋</h2>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-widest uppercase">
-              User ID: {user.uid.slice(0, 8)} • Age: {profile?.dob ? calculateAge(profile.dob) : (profile?.age || '--')}
+          <div className="min-w-0 max-w-full">
+            <h2 className="text-base xs:text-lg sm:text-xl font-black text-slate-800 dark:text-white tracking-tight leading-tight break-words">
+              {t.welcome}, {user.displayName?.split(' ')[0] || 'User'} 👋
+            </h2>
+            <p className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-widest uppercase mt-0.5 break-all">
+              <span className="hidden xs:inline">User ID: {user.uid.slice(0, 8)} • </span>Age: {profile?.dob ? calculateAge(profile.dob) : (profile?.age || '--')}
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div id="header-wellness-state" className="text-right">
-              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter mb-0.5">Wellness State</p>
-              <div className={`px-3 py-1 rounded text-[10px] font-black uppercase ${
+          <div className="flex items-center justify-between sm:justify-end gap-3.5 flex-wrap">
+            <div id="header-wellness-state" className="text-left sm:text-right">
+              <p className="hidden xs:block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter mb-0.5">Wellness State</p>
+              <div className={`px-2.5 py-1 rounded text-[9px] font-black uppercase tracking-wider ${
                 !wellnessResult ? 'bg-slate-50 dark:bg-[#18262C] text-slate-400' :
                 wellnessResult.state === 'Mild' ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400' :
                 wellnessResult.state === 'Moderate' ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400' : 'bg-red-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
@@ -979,7 +981,7 @@ function AppContent() {
                 {wellnessResult?.state || 'Scanning...'}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 xs:gap-2">
               <button 
                 id="header-easy-mode"
                 onClick={() => {
@@ -991,35 +993,35 @@ function AppContent() {
                   }
                 }} 
                 title={easyMode ? "Switch to Standard View" : "Activate Easy Read Mode"}
-                className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer ${
+                className={`w-9 h-9 xs:w-10 xs:h-10 rounded-xl border flex items-center justify-center transition-all cursor-pointer shrink-0 ${
                   easyMode 
                     ? 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
                     : 'bg-slate-50 dark:bg-[#18262C] border-slate-200 dark:border-[#2C414C] text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400'
                 }`}
               >
-                <Volume2 size={18} className={easyMode ? 'animate-bounce' : ''} />
+                <Volume2 size={16} className={easyMode ? 'animate-bounce' : ''} />
               </button>
               <button 
                 onClick={() => setShowInteractiveTour(true)} 
                 title="Take App Tour"
-                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+                className="w-9 h-9 xs:w-10 xs:h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer shrink-0"
               >
-                <Compass size={18} />
+                <Compass size={16} />
               </button>
               <button 
                 id="tour-profile-btn"
                 onClick={() => setCurrentView('profile')} 
                 title="Settings & Profile"
-                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+                className="w-9 h-9 xs:w-10 xs:h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer shrink-0"
               >
-                <User size={18} />
+                <User size={16} />
               </button>
               <button 
                 onClick={() => setShowLogoutConfirm(true)} 
                 title="Log out"
-                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors cursor-pointer"
+                className="w-9 h-9 xs:w-10 xs:h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors cursor-pointer shrink-0"
               >
-                <LogOut size={18} />
+                <LogOut size={16} />
               </button>
             </div>
           </div>
@@ -3411,6 +3413,7 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
             {safetyContacts.map(con => {
               const displayName = con.name || con.contactName || 'Safety Companion';
               const silentSmsBody = encodeURIComponent(`Hi ${displayName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from VitalMind)`);
+              const cleanDialNum = con.phone.replace(/[^\d+]/g, '');
               return (
                 <div key={con.id} className="bg-white dark:bg-[#203038] border border-red-100 dark:border-red-900/30 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
                   <div>
@@ -3423,13 +3426,13 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
 
                   <div className="grid grid-cols-2 gap-2 border-t border-slate-50 dark:border-slate-800/60 pt-3">
                     <a
-                      href={`tel:${con.phone.replace(/\s/g, '')}`}
+                      href={`tel:${cleanDialNum}`}
                       className="py-3 px-4 bg-red-600 text-white rounded-lg flex items-center justify-center gap-1.5 hover:bg-red-700 font-black text-[9px] uppercase tracking-wider transition-colors shadow-sm"
                     >
                       📞 Voice Call
                     </a>
                     <a
-                      href={`sms:${con.phone.replace(/\s/g, '')}?body=${silentSmsBody}`}
+                      href={`sms:${cleanDialNum}?body=${silentSmsBody}`}
                       className="py-3 px-4 bg-slate-900 dark:bg-[#18262C] text-white rounded-lg flex items-center justify-center gap-1.5 hover:bg-slate-800 dark:hover:bg-[#203038] font-black text-[9px] uppercase tracking-wider transition-colors shadow-sm border border-transparent dark:border-[#2C414C]"
                     >
                       💬 Silent SMS
@@ -3447,7 +3450,7 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
           <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-[0.3em] px-1">Emergency Calls</h3>
           <div className="space-y-4">
             {HELPLINES.map(h => (
-              <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="wellness-card bg-red-50/30 dark:bg-red-950/10 border-red-100/50 dark:border-red-900/30 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/20 group transition-all">
+              <a key={h.name} href={`tel:${h.number.replace(/[^\d+]/g, '')}`} className="wellness-card bg-red-50/30 dark:bg-red-950/10 border-red-100/50 dark:border-red-900/30 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/20 group transition-all">
                 <div className="space-y-1">
                   <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">{h.name}</h4>
                   <p className="text-sm text-red-600 dark:text-red-400 font-bold tracking-tighter">{h.number}</p>
