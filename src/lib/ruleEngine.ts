@@ -102,6 +102,121 @@ export function evaluateWellness(
   ];
   let warning: string | undefined;
 
+  // Sync customized preventive care tips and intelligence center alerts based on current logs
+  // 1. Mood rules
+  if (currentMood === "Sad") {
+    preventiveTips.unshift("Low mood can sometimes be alleviated by behavioral activation. Try taking a brisk 10-minute walk outside.");
+    recommendations.push("Engage in a simple, low-effort hobby or task to trigger standard mental energy loops.");
+  } else if (currentMood === "Stressed") {
+    preventiveTips.unshift("Cortisol levels rise during stress. Practice a 4-7-8 deep breathing sequence offline to trigger your parasympathetic nervous system.");
+    recommendations.push("Establish brief 'buffer zones' (5-10 mins) between heavy focus sessions or tasks to decompress.");
+  } else if (currentMood === "Anxious") {
+    preventiveTips.unshift("Anxiety is highly responsive to tactile centering. Use the 5-4-3-2-1 sensory method to anchor yourself.");
+    recommendations.push("Limit refined sugar and excessive stimulants like strong coffee/tea to stay physically grounded.");
+  } else if (currentMood === "Angry") {
+    preventiveTips.unshift("Give yourself a brief 5-minute pause before executing responses; physical space helps cool acute emotional reactions.");
+    recommendations.push("Channel intense physical energy into productive outlets like brisk physical stretches or rapid journaling.");
+  } else if (currentMood === "Tired") {
+    preventiveTips.unshift("A quick 15-20 minute power nap can restore cognitive focus margins without inducing deep sleep inertia.");
+    recommendations.push("Evaluate your physical hydration levels and step away from direct screen blue-light exposure.");
+  } else if (currentMood === "Lonely") {
+    preventiveTips.unshift("Human connection is a somatic necessity. Reach out to a family member, supportive friend, or local peer.");
+    recommendations.push("Consider working or reading in shared environments like community parks or public cafes to feel connected.");
+  } else if (currentMood === "Calm") {
+    preventiveTips.unshift("Nurture this state of serene balance. Save what activities or mindset contributed to your calm today.");
+    recommendations.push("Take some slow, mindful steps to sustain this positive cadence throughout your week.");
+  } else if (currentMood === "Happy") {
+    preventiveTips.unshift("Excellent! Celebrate your positive energy and share your active joy with others around you.");
+    recommendations.push("Engage in creative or high-reward tasks while your cognitive flexibility and optimism index is high.");
+  } else if (currentMood === "Fearful") {
+    preventiveTips.unshift("Acknowledge the fear without judgment. Penning your specific challenges makes them visual and manageable.");
+    recommendations.push("Discuss persistent fears with trustworthy guides or doctors to strip their overwhelming power.");
+  } else if (currentMood === "Dissociated") {
+    preventiveTips.unshift("Gently ground yourself: squeeze a soft stress ball, touch cold water, or focus on physical foot contact with the floor.");
+    recommendations.push("Speak aloud descriptions of your immediate physical space to support reality anchoring.");
+  } else if (currentMood === "Hopeful") {
+    preventiveTips.unshift("Leverage your outlook! Establish one achievable, positive goal for the days ahead.");
+    recommendations.push("Document what created this feeling to establish a resilient guide for future grey days.");
+  }
+
+  // 2. Symptom rules
+  if (selectedSymptoms.includes("Poor sleep") || selectedSymptoms.includes("Poor sleep / insomnia")) {
+    preventiveTips.unshift("Set a hard alarm cutoff for coffee and other caffeinated food or drinks at least 8 hours before bed.");
+    recommendations.push("Establish a pre-sleep routine (dim lights, no phone) to allow raw-melatonin generation.");
+  }
+  if (selectedSymptoms.includes("Anxiety") || selectedSymptoms.includes("Excessive worry")) {
+    preventiveTips.unshift("Use scheduled 'Worry Sessions': set aside 10 minutes a day to list concerns, freeing your mind.");
+    recommendations.push("Exhale twice as long as you inhale to naturally suppress standard cardiac adrenaline surges.");
+  }
+  if (selectedSymptoms.includes("Fatigue")) {
+    preventiveTips.unshift("Drink a full glass of cool water immediately and do 3-4 gentle full-body stretches to boost blood flow.");
+    recommendations.push("Prioritize complex carbohydrates and healthy proteins to keep your cellular fuel index optimized.");
+  }
+  if (selectedSymptoms.includes("Loss of appetite") || selectedSymptoms.includes("Low appetite")) {
+    preventiveTips.unshift("Keep simple, nourishing pureed foods, soups, or dry nuts accessible so you can feed in small quantities.");
+    recommendations.push("Stay hydrated with fluid nutrition (shakes, broth) if swallowing solid meals feels taxing.");
+  }
+  if (selectedSymptoms.includes("Overeating")) {
+    preventiveTips.unshift("Take a full 20-minute gap during meals; it takes that long for hormonal satiety cues to travel to the brain.");
+    recommendations.push("Sip hot, unsweetened or herbal tea when boredom signals pseudo-hunger to satisfy oral habits.");
+  }
+  if (selectedSymptoms.includes("Low motivation")) {
+    preventiveTips.unshift("Establish 'micro-wins': commit to standard tasks for just two minutes with zero performance pressure.");
+    recommendations.push("Declare one small goal aloud to build initial momentum; motion creates emotion.");
+  }
+  if (selectedSymptoms.includes("Headache")) {
+    preventiveTips.unshift("Take a screen-free break in a semi-dark room. Gently massage temples using small circular motions.");
+    recommendations.push("Ensure your neck posture isn't strained; keep chin level and pull shoulders down.");
+  }
+  if (selectedSymptoms.includes("Muscle tension")) {
+    preventiveTips.unshift("Take a hot bath or apply warm towels to tense muscles to prompt thermal soft tissue dilation.");
+    recommendations.push("Consciously drop your shoulders and unclench your jaw 3 times throughout the day.");
+  }
+  if (selectedSymptoms.includes("Digital eye strain")) {
+    preventiveTips.unshift("Activate the 20-20-20 rule: every 20 minutes, focus on an object 20 feet away for 20 seconds.");
+    recommendations.push("Ensure screen placement is slightly below your natural horizontal line of sight to reduce eye exposure.");
+  }
+  if (selectedSymptoms.includes("Difficulty concentrating")) {
+    preventiveTips.unshift("Disable all non-crucial notifications. Set a clean, quiet 25-minute Pomodoro focus block.");
+    recommendations.push("Keep your physical workspace orderly; structural clutter spawns cognitive clutter.");
+  }
+  if (selectedSymptoms.includes("Social withdrawal")) {
+    preventiveTips.unshift("Avoid total isolation. Step outside or work in a public library where there is minimal social demand.");
+    recommendations.push("Call or message one empathetic peer who doesn't exhaust your batteries.");
+  }
+  if (selectedSymptoms.includes("Irritability")) {
+    preventiveTips.unshift("Pause and assess unmet bodily thresholds: Are you experiencing hunger, sleepiness, or dehydration?");
+    recommendations.push("Step out of the active room or debate. 90 seconds of solitude can reset your nervous system.");
+  }
+  if (selectedSymptoms.includes("Racing thoughts")) {
+    preventiveTips.unshift("Do a direct 'cognitive dump': jot down everything swirling in your head onto physical paper.");
+    recommendations.push("Limit exposure to highly stimulating, fast-paced media scrolling and video widgets.");
+  }
+  if (selectedSymptoms.includes("Memory issues")) {
+    preventiveTips.unshift("Offset mental load by using centralized task boards, physical notes, and automated repeating reminders.");
+    recommendations.push("Consistently place essential daily tools (keys, cards, medication) in identical, dedicated locations.");
+  }
+  if (selectedSymptoms.includes("Mood swings")) {
+    preventiveTips.unshift("Take notice of potential biological cycles, nutritional habits, or abrupt sleep disruption triggers.");
+    recommendations.push("Commit to mild, light workouts to stabilize baseline neurochemical swings.");
+  }
+  if (selectedSymptoms.includes("Feeling detached from reality")) {
+    preventiveTips.unshift("Establish physical contacts: grasp cold keys, feel heavy weights, or stomp feet softly on solid ground.");
+    recommendations.push("State basic truths aloud, e.g., 'My name is relative, I am safe, and it is the present.'");
+  }
+  if (selectedSymptoms.includes("Chest tightness") || selectedSymptoms.includes("Shortness of breath") || selectedSymptoms.includes("Palpitations")) {
+    preventiveTips.unshift("Sit down, relax your chest, and control your breathing: breathe in for 4s, hold for 4s, breathe out for 4s.");
+    recommendations.push("Loosen tight neckwear or belts, and seek fresh, cool circulating air immediately.");
+  }
+  if (selectedSymptoms.includes("Physical pain")) {
+    preventiveTips.unshift("Minimize painful trigger postures. Swap to warm compress support after cooling inflammatory areas.");
+    recommendations.push("Engage in low-impact joint movements (e.g., slow walking or gentle stretching) to maintain mobility.");
+  }
+  if (selectedSymptoms.includes("Frequent urination") || selectedSymptoms.includes("Trembling or shaking") || selectedSymptoms.includes("Dizziness")) {
+    preventiveTips.unshift("Sip warm or room-temperature fluid slowly. Sidestep sudden postural stand-ups.");
+    recommendations.push("Monitor glucose patterns and completely steer clear of sudden energy crashes.");
+  }
+
   // Persistent Symptom Detection (if logged in 2 of the last 3 entries)
   const fatigueLogs = recentSymptoms.slice(0, 3).filter(logs => logs.includes("Fatigue")).length;
   const sleepLogs = recentSymptoms.slice(0, 3).filter(logs => logs.includes("Poor sleep")).length;

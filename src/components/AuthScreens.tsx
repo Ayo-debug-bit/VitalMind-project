@@ -276,10 +276,10 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
   };
 
   return (
-    <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 md:p-6 bg-slate-50 relative overflow-y-auto font-sans">
+    <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 md:p-6 bg-slate-50 dark:bg-[#111C20] relative overflow-y-auto font-sans transition-colors">
       {/* Background Ambience */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/40 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-100/40 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/40 dark:bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-100/40 dark:bg-emerald-900/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10 flex flex-col items-center py-4">
         {/* Brand Header */}
@@ -287,11 +287,11 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
           <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-2xl flex items-center justify-center mb-2 shadow-2xl shadow-blue-500/35 hover:rotate-6 transition-transform">
             <Heart className="w-7 h-7 text-white fill-white/25" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">Vital Mind</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">Vital Mind</h1>
         </div>
 
         {/* Dynamic Canvas Container */}
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-2xl p-6 md:p-8 w-full">
+        <div className="bg-white dark:bg-[#203038] rounded-[32px] border border-slate-100 dark:border-[#2C414C] shadow-2xl p-6 md:p-8 w-full">
           <AnimatePresence mode="wait">
             
             {/* LOGIN MODE */}
@@ -305,33 +305,33 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                 className="space-y-5"
               >
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 uppercase">Welcome Back</h2>
-                  <p className="text-xs text-slate-400 font-medium mt-1">Access your personal, secure dashboard.</p>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase">Welcome Back</h2>
+                  <p className="text-xs text-slate-400 dark:text-slate-400 font-medium mt-1">Access your personal, secure dashboard.</p>
                 </div>
 
                 {loginError && (
                   isOperationNotAllowed(loginError) ? (
-                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 space-y-3 px-4 font-medium text-xs">
-                      <div className="flex justify-between items-center bg-amber-100/40 p-1.5 rounded-xl border border-amber-200/50">
-                        <div className="flex items-center gap-2 font-black text-amber-800 uppercase tracking-wider text-[11px]">
-                          <AlertCircle className="shrink-0 text-amber-600 animate-bounce" size={18} />
+                    <div className="p-4 bg-amber-50 dark:bg-amber-950/25 rounded-2xl border border-amber-200 dark:border-amber-900/40 text-amber-900 dark:text-amber-200 space-y-3 px-4 font-medium text-xs">
+                      <div className="flex justify-between items-center bg-amber-100/40 dark:bg-amber-900/20 p-1.5 rounded-xl border border-amber-200/50 dark:border-amber-800/30">
+                        <div className="flex items-center gap-2 font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider text-[11px]">
+                          <AlertCircle className="shrink-0 text-amber-600 dark:text-amber-400 animate-bounce" size={18} />
                           <span>{loginError.toLowerCase().includes('google') && !loginError.toLowerCase().includes('email/password') ? 'Google Provider Required' : 'Provider Setup Required'}</span>
                         </div>
                         <button 
                           type="button"
                           onClick={() => setLoginError('')}
-                          className="p-1 hover:bg-amber-200/60 rounded-lg text-amber-700 hover:text-amber-900 transition-colors cursor-pointer"
+                          className="p-1 hover:bg-amber-200/60 dark:hover:bg-amber-900/30 rounded-lg text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 transition-colors cursor-pointer"
                           title="Exit Prompt"
                         >
                           <X size={14} />
                         </button>
                       </div>
-                      <p className="leading-relaxed text-slate-700">
+                      <p className="leading-relaxed text-slate-700 dark:text-slate-300">
                         This project is set up with Firebase, but the <strong>{loginError.toLowerCase().includes('google') && !loginError.toLowerCase().includes('email/password') ? 'Google' : 'Email/Password'}</strong> provider is disabled in your Firebase Console.
                       </p>
-                      <div className="p-3 bg-white/75 rounded-xl border border-amber-100 space-y-1.5 text-slate-600 text-[11px] leading-relaxed">
-                        <div className="font-bold text-slate-800 uppercase tracking-wide text-[9px] mb-0.5">How to enable this:</div>
-                        <div>1. Open your <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-bold hover:text-blue-800">Firebase Console</a>.</div>
+                      <div className="p-3 bg-white/75 dark:bg-[#18262C]/75 rounded-xl border border-amber-100 dark:border-amber-900/20 space-y-1.5 text-slate-600 dark:text-slate-350 text-[11px] leading-relaxed">
+                        <div className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide text-[9px] mb-0.5">How to enable this:</div>
+                        <div>1. Open your <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-450 underline font-bold hover:text-blue-800 dark:hover:text-blue-300">Firebase Console</a>.</div>
                         <div>2. Select your project and click on <strong>Authentication</strong>.</div>
                         <div>3. Click the <strong>Sign-in method</strong> tab.</div>
                         {loginError.toLowerCase().includes('google') && !loginError.toLowerCase().includes('email/password') ? (
@@ -344,24 +344,24 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                         )}
                       </div>
                       <div className="pt-2 flex flex-col gap-2">
-                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest text-center">Or use backup option:</span>
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-center">Or use backup option:</span>
                         {loginError.toLowerCase().includes('google') && !loginError.toLowerCase().includes('email/password') ? (
-                          <div className="p-3 bg-white hover:bg-slate-50 border border-slate-100 rounded-xl space-y-3 shadow-sm transition-all text-left">
-                            <span className="text-[9px] text-blue-600 font-black uppercase tracking-wide flex items-center gap-1">
+                          <div className="p-3 bg-white dark:bg-[#18262C] hover:bg-slate-50 dark:hover:bg-[#203038] border border-slate-100 dark:border-[#2C414C] rounded-xl space-y-3 shadow-sm transition-all text-left">
+                            <span className="text-[9px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-wide flex items-center gap-1">
                               <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
                               Simulate Google Sign-In
                             </span>
-                            <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                            <p className="text-[10px] text-slate-500 dark:text-[#a8b8c0] leading-normal font-medium">
                               Since Google authentication is blocked by sandbox constraints, continue locally using your Google email address:
                             </p>
                             <div className="space-y-1">
-                              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest pl-0.5">Google Email Address</label>
+                              <label className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-0.5">Google Email Address</label>
                               <input 
                                 type="email"
                                 value={simulatedGoogleEmail}
                                 onChange={(e) => setSimulatedGoogleEmail(e.target.value)}
                                 placeholder="oluyemiayomide16@gmail.com"
-                                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:outline-none rounded-xl py-2 px-3 text-xs font-semibold text-slate-800 transition-colors"
+                                className="w-full bg-slate-50 dark:bg-[#1C2C33] border border-slate-200 dark:border-[#2C414C] focus:bg-white focus:dark:bg-[#203038] focus:border-blue-500 focus:outline-none rounded-xl py-2 px-3 text-xs font-semibold text-slate-800 dark:text-[#E3ECF0] transition-colors"
                               />
                             </div>
                             <button
@@ -437,45 +437,45 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-5 bg-red-50 text-red-900 rounded-2xl space-y-3 border border-red-200 text-xs font-semibold">
-                      <div className="flex justify-between items-center bg-red-100/40 p-1.5 rounded-xl border border-red-200/50">
-                        <div className="flex items-center gap-2 font-black text-red-800 uppercase tracking-wider text-[11px]">
-                          <AlertCircle className="shrink-0 text-red-600 animate-bounce" size={18} />
+                    <div className="p-5 bg-red-50 dark:bg-rose-950/20 text-red-900 dark:text-rose-200 rounded-2xl space-y-3 border border-red-200 dark:border-rose-900/40 text-xs font-semibold">
+                      <div className="flex justify-between items-center bg-red-105/40 dark:bg-rose-900/20 p-1.5 rounded-xl border border-red-200/50 dark:border-rose-800/30">
+                        <div className="flex items-center gap-2 font-black text-red-800 dark:text-rose-300 uppercase tracking-wider text-[11px]">
+                          <AlertCircle className="shrink-0 text-red-600 dark:text-rose-450 animate-bounce" size={18} />
                           <span>Login Failure</span>
                         </div>
                         <button 
                           type="button"
                           onClick={() => setLoginError('')}
-                          className="p-1 hover:bg-red-200/60 rounded-lg text-red-700 hover:text-red-950 transition-colors cursor-pointer"
+                          className="p-1 hover:bg-red-200/60 dark:hover:bg-rose-900/30 rounded-lg text-red-700 dark:text-rose-400 hover:text-red-950 dark:text-rose-100 transition-colors cursor-pointer"
                           title="Clear Error"
                         >
                           <X size={14} />
                         </button>
                       </div>
                       
-                      <p className="leading-relaxed text-slate-700 font-medium">
+                      <p className="leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
                         {loginError}
                       </p>
 
-                      <div className="pt-2 border-t border-red-100/70 flex flex-col gap-2 font-normal">
-                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest text-center mt-1">Stuck? Bypass or simulation option:</span>
+                      <div className="pt-2 border-t border-red-100/70 dark:border-rose-900/30 flex flex-col gap-2 font-normal">
+                        <span className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-center mt-1">Stuck? Bypass or simulation option:</span>
                         
-                        <div className="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl space-y-3 shadow-xs transition-all text-left">
-                          <span className="text-[9px] text-blue-600 font-black uppercase tracking-wide flex items-center gap-1 font-bold">
+                        <div className="p-3 bg-white dark:bg-[#18262C] hover:bg-slate-50 dark:hover:bg-[#203038] border border-slate-200 dark:border-[#2C414C] rounded-xl space-y-3 shadow-xs transition-colors text-left">
+                          <span className="text-[9px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-wide flex items-center gap-1 font-bold">
                             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
                             Simulate Google Sign-In
                           </span>
-                          <p className="text-[10px] text-slate-500 leading-normal">
+                          <p className="text-[10px] text-slate-500 dark:text-[#a8b8c0] leading-normal">
                             If Firebase is blocked by sandbox policy or you have credentials problems, proceed locally with your Google email:
                           </p>
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest pl-0.5">Google Email Address</label>
+                            <label className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-0.5">Google Email Address</label>
                             <input 
                               type="email"
                               value={simulatedGoogleEmail}
                               onChange={(e) => setSimulatedGoogleEmail(e.target.value)}
                               placeholder="oluyemiayomide16@gmail.com"
-                              className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 focus:outline-none rounded-xl py-2 px-3 text-xs font-semibold text-slate-800 transition-colors"
+                              className="w-full bg-slate-50 dark:bg-[#1C2C33] border border-slate-200 dark:border-[#2C414C] focus:bg-white focus:dark:bg-[#203038] focus:border-blue-500 focus:outline-none rounded-xl py-2 px-3 text-xs font-semibold text-slate-800 dark:text-[#E3ECF0] transition-colors"
                             />
                           </div>
                           <button
@@ -604,15 +604,15 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                   <button 
                     type="submit"
                     disabled={loginLoading}
-                    className="btn-primary w-full py-3.5 text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-100 flex items-center justify-center"
+                    className="btn-primary w-full py-3.5 text-[11px] font-black uppercase tracking-widest shadow-xl shadow-blue-100/5 dark:shadow-none flex items-center justify-center cursor-pointer"
                   >
                     {loginLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Sign In'}
                   </button>
 
                   <div className="flex items-center my-3 relative">
-                    <div className="flex-1 border-t border-slate-100"></div>
-                    <span className="px-3 text-[9px] font-black uppercase text-slate-400 tracking-widest">or</span>
-                    <div className="flex-1 border-t border-slate-100"></div>
+                    <div className="flex-1 border-t border-slate-100 dark:border-slate-700/60 font-semibold"></div>
+                    <span className="px-3 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">or</span>
+                    <div className="flex-1 border-t border-slate-100 dark:border-slate-700/60 font-semibold"></div>
                   </div>
 
                   <button 
@@ -629,7 +629,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                         setLoginLoading(false);
                        }
                     }}
-                    className="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-sm"
+                    className="w-full py-3 bg-white dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] text-slate-700 dark:text-[#E3ECF0] rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-[#203038] hover:scale-[1.01] active:scale-[0.99] transition-all shadow-sm cursor-pointer"
                   >
                     <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l3.241-3.116C18.308 1.83 15.518 1 12.24 1 6.033 1 1 6.033 1 12.24s5.033 11.24 11.24 11.24c6.478 0 10.793-4.537 10.793-10.986 0-.74-.08-1.3-.177-1.859H12.24z"/>
@@ -651,7 +651,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                         setLoginLoading(false);
                       }
                     }}
-                    className="w-full py-3 bg-slate-50 border border-slate-100 hover:bg-slate-100/80 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                    className="w-full py-3 bg-slate-50 dark:bg-[#111C20] border border-slate-100 dark:border-transparent hover:bg-slate-100/80 dark:hover:bg-[#18262C] text-slate-600 dark:text-[#a8b8c0] rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
                   >
                     <span>Continue as Guest</span>
                   </button>
@@ -662,9 +662,9 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                       setGeneralError('');
                       setMode('signup');
                     }}
-                    className="w-full text-center text-xs font-bold text-slate-500 hover:text-slate-700 mt-1 block"
+                    className="w-full text-center text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 mt-1 block cursor-pointer"
                   >
-                    Don't have an account? <span className="text-blue-600 hover:underline">Sign up</span>
+                    Don't have an account? <span className="text-blue-600 dark:text-blue-400 hover:underline">Sign up</span>
                   </button>
                 </div>
               </motion.form>
@@ -1065,9 +1065,9 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                   </button>
 
                   <div className="flex items-center my-3 relative">
-                    <div className="flex-1 border-t border-slate-100"></div>
-                    <span className="px-3 text-[9px] font-black uppercase text-slate-400 tracking-widest">or</span>
-                    <div className="flex-1 border-t border-slate-100"></div>
+                    <div className="flex-1 border-t border-slate-100 dark:border-slate-700/60"></div>
+                    <span className="px-3 text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">or</span>
+                    <div className="flex-1 border-t border-slate-100 dark:border-slate-700/60"></div>
                   </div>
 
                   <button 
@@ -1084,7 +1084,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                         setSignupLoading(false);
                       }
                     }}
-                    className="w-full py-2.5 bg-white border border-slate-200 text-slate-700 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-sm"
+                    className="w-full py-2.5 bg-white dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] text-slate-700 dark:text-[#E3ECF0] rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-[#203038] hover:scale-[1.01] active:scale-[0.99] transition-all shadow-sm cursor-pointer"
                   >
                     <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                       <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.275 1.565-1.88 4.604-6.887 4.604-4.33 0-7.866-3.577-7.866-8s3.536-8 7.866-8c2.46 0 4.105 1.025 5.047 1.926l3.241-3.116C18.308 1.83 15.518 1 12.24 1 6.033 1 1 6.033 1 12.24s5.033 11.24 11.24 11.24c6.478 0 10.793-4.537 10.793-10.986 0-.74-.08-1.3-.177-1.859H12.24z"/>
@@ -1106,7 +1106,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                         setSignupLoading(false);
                       }
                     }}
-                    className="w-full py-3 bg-slate-50 border border-slate-100 hover:bg-slate-100/80 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all"
+                    className="w-full py-3 bg-slate-50 dark:bg-[#111C20] border border-slate-100 dark:border-[#2C414C] hover:bg-slate-100/80 dark:hover:bg-[#18262C] text-slate-600 dark:text-[#a8b8c0] rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-[0.99] transition-all"
                   >
                     <span>Continue as Guest</span>
                   </button>
@@ -1114,9 +1114,9 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                   <button 
                     type="button"
                     onClick={() => setMode('login')}
-                    className="w-full text-center text-xs font-bold text-slate-500 mt-1 block hover:text-slate-700"
+                    className="w-full text-center text-xs font-bold text-slate-500 dark:text-[#a8b8c0] mt-1 block hover:text-slate-700 dark:hover:text-white"
                   >
-                    Already have an account? <span className="text-blue-600 hover:underline">Log in</span>
+                    Already have an account? <span className="text-blue-600 dark:text-blue-450 hover:underline">Log in</span>
                   </button>
                 </div>
               </motion.form>
@@ -1152,7 +1152,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
 
                 {forgotMode === 'selection' && !forgotMessage && (
                   <div className="space-y-4 pt-2">
-                    <p className="text-xs text-slate-500 font-medium leading-relaxed">
+                    <p className="text-xs text-slate-500 dark:text-[#a8b8c0] font-medium leading-relaxed">
                       How would you like to verify authorization and recover your credentials?
                     </p>
 
@@ -1163,14 +1163,14 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                           setForgotMode('email');
                           setForgotError('');
                         }}
-                        className="p-5 bg-slate-50 border border-slate-100 hover:bg-blue-50/50 hover:border-blue-100 rounded-2xl flex items-center gap-4 text-left transition-all group"
+                        className="p-5 bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] hover:bg-blue-50/50 dark:hover:bg-[#203038] hover:border-blue-100 dark:hover:border-blue-900/65 rounded-2xl flex items-center gap-4 text-left transition-all group"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/40 text-blue-650 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                           <Mail size={18} />
                         </div>
                         <div>
-                          <h4 className="text-xs font-black uppercase text-slate-900 tracking-tight">Standard Email Link</h4>
-                          <p className="text-[10px] font-medium text-slate-400 leading-normal mt-0.5">Recieve a secure self-reset page link in your inbox.</p>
+                          <h4 className="text-xs font-black uppercase text-slate-900 dark:text-[#E3ECF0] tracking-tight">Standard Email Link</h4>
+                          <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-normal mt-0.5">Recieve a secure self-reset page link in your inbox.</p>
                         </div>
                       </button>
 
@@ -1180,14 +1180,14 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                           setForgotMode('security');
                           setForgotError('');
                         }}
-                        className="p-5 bg-slate-50 border border-slate-100 hover:bg-emerald-50/50 hover:border-emerald-100 rounded-2xl flex items-center gap-4 text-left transition-all group"
+                        className="p-5 bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] hover:bg-emerald-50/50 dark:hover:bg-[#203038] hover:border-emerald-100 dark:hover:border-emerald-900/65 rounded-2xl flex items-center gap-4 text-left transition-all group"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-650 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                           <ShieldCheck size={18} />
                         </div>
                         <div>
-                          <h4 className="text-xs font-black uppercase text-slate-900 tracking-tight">Security Question</h4>
-                          <p className="text-[10px] font-medium text-slate-400 leading-normal mt-0.5">Answer your security question securely on this browser.</p>
+                          <h4 className="text-xs font-black uppercase text-slate-900 dark:text-[#E3ECF0] tracking-tight">Security Question</h4>
+                          <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-normal mt-0.5">Answer your security question securely on this browser.</p>
                         </div>
                       </button>
                     </div>
@@ -1246,13 +1246,13 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                       </div>
                     ) : (
                       <form onSubmit={handleSecurityQuestionReset} className="space-y-4">
-                        <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold text-slate-700 leading-relaxed">
-                          <HelpCircle className="inline text-blue-600 mr-1.5" size={16} />
+                        <div className="p-4 bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] rounded-2xl text-xs font-semibold text-slate-700 dark:text-[#E3ECF0] leading-relaxed">
+                          <HelpCircle className="inline text-blue-600 dark:text-blue-400 mr-1.5" size={16} />
                           <span className="font-bold">Question:</span> "{securityQuestion}"
                         </div>
 
                         <div className="space-y-11.5">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Your Answer</label>
+                          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Your Answer</label>
                           <input 
                             type="text"
                             value={securityAnswer}
@@ -1276,7 +1276,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                 )}
 
                 {/* Bottom navigation */}
-                <div className="flex justify-between items-center border-t border-slate-50 pt-4">
+                <div className="flex justify-between items-center border-t border-slate-50 dark:border-[#2C414C]/50 pt-4">
                   {forgotMode !== 'selection' && !forgotMessage ? (
                     <button 
                       type="button" 
@@ -1284,7 +1284,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                         setForgotMode('selection');
                         setForgotError('');
                       }} 
-                      className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors"
+                      className="text-xs font-bold text-slate-500 dark:text-[#a8b8c0] hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       ← Back Options
                     </button>
@@ -1301,7 +1301,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
                       setSecurityAnswer('');
                       setForgotMessage('');
                     }}
-                    className="text-xs font-bold text-blue-600 hover:underline pl-1"
+                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline pl-1"
                   >
                     Return to Sign In
                   </button>
@@ -1316,7 +1316,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
         <div className="mt-8 flex flex-col w-full gap-3">
           <button 
             onClick={onCrisisClick}
-            className="w-full py-4 bg-white/70 backdrop-blur-md border border-slate-200 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 hover:text-red-600 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-white/70 dark:bg-[#18262C]/70 backdrop-blur-md border border-slate-200 dark:border-[#2C414C] text-slate-600 dark:text-[#a8b8c0] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-[#203038] hover:text-red-650 dark:hover:text-red-400 transition-all flex items-center justify-center gap-2"
           >
             <AlertCircle size={14} className="text-red-500" /> I Need Help Right Now
           </button>

@@ -8,22 +8,23 @@ import {
   Plus, 
   ChevronRight, 
   LogOut, 
-  AlertCircle,
-  CheckCircle2,
-  Zap,
-  Info,
-  Phone,
-  LayoutDashboard,
-  User,
-  Download,
-  Trash2,
-  Clock,
-  Lock,
-  Eye,
-  ShieldCheck,
-  ShieldAlert,
-  Sparkles,
-  Volume2
+  AlertCircle, 
+  CheckCircle2, 
+  Zap, 
+  Info, 
+  Phone, 
+  LayoutDashboard, 
+  User, 
+  Download, 
+  Trash2, 
+  Clock, 
+  Lock, 
+  Eye, 
+  ShieldCheck, 
+  ShieldAlert, 
+  Sparkles, 
+  Volume2,
+  Compass
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -38,6 +39,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AuthScreens } from './components/AuthScreens';
 import { jsPDF } from 'jspdf';
 import { OnboardingFlow } from './components/OnboardingFlow';
+import { InteractiveTour } from './components/InteractiveTour';
 import { 
   evaluateWellness, 
   MoodType, 
@@ -95,6 +97,18 @@ const resolveDate = (ts: any): Date => {
   return new Date();
 };
 
+export function calculateAge(dobString: string): number {
+  if (!dobString) return 0;
+  const birthDate = new Date(dobString);
+  const today = new Date();
+  let computedAge = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    computedAge--;
+  }
+  return computedAge;
+}
+
 interface FirestoreErrorInfo {
   error: string;
   operationType: OperationType;
@@ -135,6 +149,7 @@ function AppContent() {
   const [symptomLogs, setSymptomLogs] = useState<any[]>([]);
   const [wellnessResult, setWellnessResult] = useState<EvaluationResult | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showInteractiveTour, setShowInteractiveTour] = useState(false);
   const [age, setAge] = useState('');
   const [profile, setProfile] = useState<any>(null);
   const [modalInfo, setModalInfo] = useState<{ title: string, content: string } | null>(null);
@@ -176,6 +191,17 @@ function AppContent() {
       setLocale(profile.locale);
     }
   }, [profile]);
+
+  // Synchronize document.documentElement dark class with theme state
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
 
   // Offline handler effect
   useEffect(() => {
@@ -555,9 +581,9 @@ function AppContent() {
 
   // Recalculate wellness state
   useEffect(() => {
-    if (moodLogs.length > 0) {
-      const currentMood = moodLogs[0].mood as MoodType;
-      const recentMoods = moodLogs.slice(1).map(m => m.mood as MoodType);
+    if (moodLogs.length > 0 || symptomLogs.length > 0) {
+      const currentMood = moodLogs.length > 0 ? (moodLogs[0].mood as MoodType) : "Neutral" as MoodType;
+      const recentMoods = moodLogs.length > 0 ? moodLogs.slice(1).map(m => m.mood as MoodType) : [];
       const recentSymptomsHistory = symptomLogs.map(s => s.symptoms as SymptomType[]);
       const currentSymptoms = recentSymptomsHistory.length > 0 ? recentSymptomsHistory[0] : [];
       const pastSymptoms = recentSymptomsHistory.slice(1);
@@ -591,6 +617,7 @@ function AppContent() {
   const handleOnboardingComplete = async (data: {
     name: string;
     age: number;
+    dob: string;
     reminderEnabled: boolean;
     reminderTime: string;
     securityQuestion: string;
@@ -611,6 +638,7 @@ function AppContent() {
           name: data.name,
           email: user.email,
           age: data.age,
+          dob: data.dob,
           username: 'guest',
           securityQuestion: data.securityQuestion,
           securityAnswer: hashed,
@@ -626,6 +654,7 @@ function AppContent() {
         window.dispatchEvent(new Event('vitalmind_guest_data_changed'));
         setLocale(data.locale);
         setShowOnboarding(false);
+        setShowInteractiveTour(true);
       } catch (e) {
         console.error("Guest onboarding error:", e);
       }
@@ -644,6 +673,7 @@ function AppContent() {
         name: data.name,
         email: user.email,
         age: data.age,
+        dob: data.dob,
         username: userDoc.exists() ? userDoc.data().username : (user.displayName || user.uid),
         securityQuestion: data.securityQuestion,
         securityAnswer: hashed,
@@ -673,6 +703,7 @@ function AppContent() {
 
       setLocale(data.locale);
       setShowOnboarding(false);
+      setShowInteractiveTour(true);
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, path);
     }
@@ -688,6 +719,7 @@ function AppContent() {
           name: 'Guest User',
           email: 'guest@vitalmind.app',
           age: 18,
+          dob: '2008-01-01',
           username: 'guest',
           securityQuestion: 'What is your favorite color?',
           securityAnswer: 'blue',
@@ -720,6 +752,7 @@ function AppContent() {
         name: user.displayName || 'User',
         email: user.email || '',
         age: 18,
+        dob: '2008-01-01',
         username: userDoc.exists() ? userDoc.data().username : (user.displayName || user.uid).replace(/[^a-zA-Z0-9]/g, '').toLowerCase(),
         securityQuestion: 'What is your favorite color?',
         securityAnswer: hashed,
@@ -774,7 +807,7 @@ function AppContent() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'dashboard': return <DashboardView moodLogs={moodLogs} result={wellnessResult} setView={setCurrentView} profile={profile} communityVote={communityVote} submitVote={submitCommunityVote} setLocale={setLocale} tLocale={locale} setModalInfo={setModalInfo} easyMode={easyMode} speakText={speakText} />;
+      case 'dashboard': return <DashboardView moodLogs={moodLogs} result={wellnessResult} setView={setCurrentView} profile={profile} communityVote={communityVote} submitVote={submitCommunityVote} setLocale={setLocale} tLocale={locale} setModalInfo={setModalInfo} easyMode={easyMode} speakText={speakText} triggerTour={() => setShowInteractiveTour(true)} />;
       case 'mood': return <MoodLoggerView onComplete={() => setCurrentView('dashboard')} userId={user.uid} />;
       case 'symptoms': return <SymptomLoggerView onComplete={() => setCurrentView('dashboard')} onNavigateToCrisis={() => setCurrentView('crisis')} userId={user.uid} />;
       case 'history': return (
@@ -835,6 +868,7 @@ function AppContent() {
             localStorage.setItem('vitalmind_easy_mode', val ? 'true' : 'false');
           }}
           speakText={speakText}
+          triggerTour={() => setShowInteractiveTour(true)}
           onBack={() => setCurrentView('dashboard')} 
         />
       );
@@ -865,30 +899,42 @@ function AppContent() {
             onClick={() => setCurrentView('dashboard')} 
             icon={<LayoutDashboard size={20} />} 
             label={t.dashboard} 
+            id="nav-home"
           />
           <SidebarItem 
             active={currentView === 'mood'} 
             onClick={() => setCurrentView('mood')} 
-            icon={<Activity size={20} />} 
+            icon={<Heart size={20} />} 
             label={t.moodTracker} 
+            id="nav-mood"
+          />
+          <SidebarItem 
+            active={currentView === 'symptoms'} 
+            onClick={() => setCurrentView('symptoms')} 
+            icon={<Activity size={20} />} 
+            label={t.symptoms} 
+            id="nav-symptoms"
           />
           <SidebarItem 
             active={currentView === 'history'} 
             onClick={() => setCurrentView('history')} 
             icon={<Calendar size={20} />} 
             label={t.wellnessHistory} 
+            id="nav-history"
           />
           <SidebarItem 
             active={currentView === 'resources'} 
             onClick={() => setCurrentView('resources')} 
             icon={<BookOpen size={20} />} 
             label={t.helpLibrary} 
+            id="nav-resources"
           />
           <SidebarItem 
             active={currentView === 'crisis'} 
             onClick={() => setCurrentView('crisis')} 
             icon={<AlertCircle size={20} className="text-red-500" />} 
             label={t.crisisMode} 
+            id="nav-crisis"
           />
         </nav>
 
@@ -919,11 +965,11 @@ function AppContent() {
           <div>
             <h2 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">{t.welcome}, {user.displayName?.split(' ')[0]} 👋</h2>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-widest uppercase">
-              User ID: {user.uid.slice(0, 8)} • Age: {profile?.age || '--'}
+              User ID: {user.uid.slice(0, 8)} • Age: {profile?.dob ? calculateAge(profile.dob) : (profile?.age || '--')}
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right">
+            <div id="header-wellness-state" className="text-right">
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-tighter mb-0.5">Wellness State</p>
               <div className={`px-3 py-1 rounded text-[10px] font-black uppercase ${
                 !wellnessResult ? 'bg-slate-50 dark:bg-[#18262C] text-slate-400' :
@@ -935,6 +981,7 @@ function AppContent() {
             </div>
             <div className="flex items-center gap-2">
               <button 
+                id="header-easy-mode"
                 onClick={() => {
                   const val = !easyMode;
                   setEasyMode(val);
@@ -953,6 +1000,14 @@ function AppContent() {
                 <Volume2 size={18} className={easyMode ? 'animate-bounce' : ''} />
               </button>
               <button 
+                onClick={() => setShowInteractiveTour(true)} 
+                title="Take App Tour"
+                className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+              >
+                <Compass size={18} />
+              </button>
+              <button 
+                id="tour-profile-btn"
                 onClick={() => setCurrentView('profile')} 
                 title="Settings & Profile"
                 className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
@@ -1005,20 +1060,20 @@ function AppContent() {
             initial={{ opacity: 0, y: -50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-6 right-6 z-[120] max-w-sm w-full bg-white border border-slate-150/80 shadow-2xl rounded-3xl p-6 flex flex-col gap-3 shadow-blue-100/30"
+            className="fixed top-6 right-6 z-[120] max-w-sm w-full bg-white dark:bg-[#203038] border border-slate-150/80 dark:border-[#2C414C] shadow-2xl rounded-3xl p-6 flex flex-col gap-3 shadow-blue-100/30 dark:shadow-none"
           >
             <div className="flex justify-between items-start gap-4">
               <div className="flex gap-3">
                 <span className="text-2xl pt-0.5 shrink-0">🔔</span>
                 <div className="space-y-1">
-                  <h4 className="font-black text-[10px] uppercase tracking-wider text-blue-600">VitalMind Alert</h4>
-                  <p className="text-xs font-bold text-slate-800 leading-relaxed">{activeNotification.body}</p>
+                  <h4 className="font-black text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400">VitalMind Alert</h4>
+                  <p className="text-xs font-bold text-slate-800 dark:text-[#E3ECF0] leading-relaxed">{activeNotification.body}</p>
                 </div>
               </div>
               <button 
                 type="button" 
                 onClick={() => setActiveNotification(null)} 
-                className="text-slate-400 hover:text-slate-600 transition-colors shrink-0 p-1"
+                className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-350 transition-colors shrink-0 p-1"
               >
                 ✕
               </button>
@@ -1045,10 +1100,11 @@ function AppContent() {
           ? 'bg-[#1C2C33]/95 border-[#2C414C] text-slate-100' 
           : 'bg-white/95 border-slate-200 text-slate-900'
       }`}>
-        <NavButton active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} icon={<LayoutDashboard size={20} />} label="Home" theme={theme} />
-        <NavButton active={currentView === 'mood'} onClick={() => setCurrentView('mood')} icon={<Activity size={21} />} label="Mood" theme={theme} />
-        <NavButton active={currentView === 'history'} onClick={() => setCurrentView('history')} icon={<Calendar size={20} />} label="History" theme={theme} />
-        <NavButton active={currentView === 'resources'} onClick={() => setCurrentView('resources')} icon={<BookOpen size={20} />} label="Help" theme={theme} />
+        <NavButton active={currentView === 'dashboard'} onClick={() => setCurrentView('dashboard')} icon={<LayoutDashboard size={20} />} label="Home" theme={theme} id="nav-home" />
+        <NavButton active={currentView === 'mood'} onClick={() => setCurrentView('mood')} icon={<Heart size={21} />} label="Mood" theme={theme} id="nav-mood" />
+        <NavButton active={currentView === 'symptoms'} onClick={() => setCurrentView('symptoms')} icon={<Activity size={21} />} label="Symptoms" theme={theme} id="nav-symptoms" />
+        <NavButton active={currentView === 'history'} onClick={() => setCurrentView('history')} icon={<Calendar size={20} />} label="History" theme={theme} id="nav-history" />
+        <NavButton active={currentView === 'resources'} onClick={() => setCurrentView('resources')} icon={<BookOpen size={20} />} label="Help" theme={theme} id="nav-resources" />
       </nav>
 
       {/* Onboarding Dialog */}
@@ -1062,6 +1118,16 @@ function AppContent() {
         )}
       </AnimatePresence>
 
+      {/* Interactive Guided Tour */}
+      {showInteractiveTour && (
+        <InteractiveTour 
+          onClose={() => setShowInteractiveTour(false)}
+          theme={theme}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+        />
+      )}
+
       {/* Info Modal */}
       <AnimatePresence>
         {modalInfo && (
@@ -1070,22 +1136,22 @@ function AppContent() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl space-y-6"
+              className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] rounded-3xl p-8 w-full max-w-md shadow-2xl space-y-6"
             >
               <div className="flex justify-between items-start">
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
                   <Info size={24} />
                 </div>
                 <button 
                   onClick={() => setModalInfo(null)}
-                  className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-[#1C2C33] rounded-full text-slate-400 dark:text-slate-500 transition-colors"
                 >
                   <Plus className="rotate-45" size={20} />
                 </button>
               </div>
               <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase mb-2">{modalInfo.title}</h3>
-                <p className="text-slate-600 leading-relaxed font-medium">{modalInfo.content}</p>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-2">{modalInfo.title}</h3>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{modalInfo.content}</p>
               </div>
               <button 
                 onClick={() => setModalInfo(null)}
@@ -1106,29 +1172,29 @@ function AppContent() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl space-y-6 border border-slate-100"
+              className="bg-white dark:bg-[#203038] rounded-3xl p-8 w-full max-w-md shadow-2xl space-y-6 border border-slate-100 dark:border-[#2C414C]"
             >
               <div className="flex justify-between items-start">
-                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100/60">
+                <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center border border-emerald-100/60 dark:border-emerald-900/50">
                   <Sparkles size={24} />
                 </div>
                 <button 
                   onClick={() => setActiveSupportTip(null)}
-                  className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"
+                  className="p-2 hover:bg-slate-100 dark:hover:bg-[#1C2C33] rounded-full text-slate-400 dark:text-slate-500 transition-colors"
                 >
                   <Plus className="rotate-45" size={20} />
                 </button>
               </div>
               <div>
-                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50">
+                <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-100/50 dark:border-emerald-900/45">
                   Contextual Support Active
                 </span>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase mb-2 mt-4">Personalized Wellness Tip</h3>
-                <p className="text-slate-600 leading-relaxed font-semibold">{activeSupportTip}</p>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-2 mt-4">Personalized Wellness Tip</h3>
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed font-semibold">{activeSupportTip}</p>
               </div>
               <button 
                 onClick={() => setActiveSupportTip(null)}
-                className="btn-primary w-full py-3.5 text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100"
+                className="btn-primary w-full py-3.5 text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100 dark:shadow-none"
               >
                 Got it, thank you 🌱
               </button>
@@ -1145,19 +1211,19 @@ function AppContent() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl space-y-6 text-center"
+              className="bg-white dark:bg-[#203038] border border-slate-150 dark:border-[#2C414C] rounded-3xl p-8 w-full max-w-sm shadow-2xl space-y-6 text-center"
             >
-              <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+              <div className="w-16 h-16 bg-red-50 dark:bg-red-950/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-2">
                 <LogOut size={28} />
               </div>
               <div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase mb-2">Are you sure?</h3>
-                <p className="text-slate-500 font-medium">You will be logged out of your wellness dashboard.</p>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-2">Are you sure?</h3>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">You will be logged out of your wellness dashboard.</p>
               </div>
               <div className="flex gap-4">
                 <button 
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-colors"
+                  className="flex-1 py-4 bg-slate-100 dark:bg-[#18262C] text-slate-600 dark:text-slate-300 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 dark:hover:bg-[#203038] transition-colors"
                 >
                   Cancel
                 </button>
@@ -1166,7 +1232,7 @@ function AppContent() {
                     logout();
                     setShowLogoutConfirm(false);
                   }}
-                  className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-red-700 shadow-lg shadow-red-100 transition-all"
+                  className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-red-700 shadow-lg shadow-red-100 dark:shadow-none transition-all"
                 >
                   Log Out
                 </button>
@@ -1179,9 +1245,10 @@ function AppContent() {
   );
 }
 
-function SidebarItem({ active, onClick, icon, label }: { active: boolean, onClick: () => void, icon: ReactNode, label: string }) {
+function SidebarItem({ active, onClick, icon, label, id }: { active: boolean, onClick: () => void, icon: ReactNode, label: string, id?: string }) {
   return (
     <button 
+      id={id}
       onClick={onClick}
       className={`wellness-sidebar-item w-full ${active ? 'wellness-sidebar-item-active shadow-sm' : 'wellness-sidebar-item-inactive'}`}
     >
@@ -1191,11 +1258,11 @@ function SidebarItem({ active, onClick, icon, label }: { active: boolean, onClic
   );
 }
 
-function NavButton({ active, onClick, icon, label, theme }: { active: boolean, onClick: () => void, icon: ReactNode, label: string, theme?: string }) {
+function NavButton({ active, onClick, icon, label, theme, id }: { active: boolean, onClick: () => void, icon: ReactNode, label: string, theme?: string, id?: string }) {
   const activeClass = theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600';
   const inactiveClass = 'text-slate-400 hover:text-emerald-500 dark:text-slate-500';
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${active ? activeClass : inactiveClass}`}>
+    <button id={id} onClick={onClick} className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${active ? activeClass : inactiveClass}`}>
       <div className={`p-1.5 rounded-xl transition-all ${active ? 'scale-110 bg-emerald-500/10 dark:bg-emerald-500/20' : ''}`}>
         {icon}
       </div>
@@ -1215,7 +1282,8 @@ function DashboardView({
   tLocale, 
   setModalInfo,
   easyMode,
-  speakText
+  speakText,
+  triggerTour
 }: { 
   moodLogs: any[], 
   result: any, 
@@ -1227,7 +1295,8 @@ function DashboardView({
   tLocale: any, 
   setModalInfo: (i: any) => void,
   easyMode: boolean,
-  speakText: (t: string) => void
+  speakText: (t: string) => void,
+  triggerTour: () => void
 }) {
 
   const t = TRANSLATIONS[tLocale as Locale] || TRANSLATIONS['en'];
@@ -1319,9 +1388,34 @@ function DashboardView({
           </div>
           <button 
             onClick={() => setView('crisis')}
-            className="px-6 py-2 bg-red-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-100 whitespace-nowrap"
+            className="px-6 py-2 bg-red-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-500/15 dark:shadow-none whitespace-nowrap"
           >
             {t.getHelpNow}
+          </button>
+        </div>
+      </div>
+
+      {/* 1-Minute Navigation Tour Callout */}
+      <div className="col-span-12">
+        <div className="bg-blue-50/50 dark:bg-blue-950/10 border border-blue-100/50 dark:border-[#2C414C] p-5 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex gap-4 items-center">
+            <div className="w-11 h-11 bg-blue-600 dark:bg-blue-700/60 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-blue-500/10">
+              <Compass size={22} className="animate-pulse" />
+            </div>
+            <div>
+              <h4 className="font-black text-slate-800 dark:text-white uppercase text-[10px] tracking-widest flex items-center gap-2">
+                New to VitalMind? Take the 1-Minute Visual Tour
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-[#a8b8c0] font-medium leading-relaxed mt-0.5">
+                Learn how to locate trackers, understand warning telemetry, download shared doctor reports & navigate seamlessly.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={triggerTour}
+            className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl uppercase tracking-widest transition-all shadow-md shadow-blue-500/15 cursor-pointer whitespace-nowrap active:scale-[0.98]"
+          >
+            Start App Tour
           </button>
         </div>
       </div>
@@ -1349,7 +1443,7 @@ function DashboardView({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 text-white">
           <button 
             onClick={() => setView('mood')} 
-            className="bg-blue-600 p-8 rounded-3xl text-left shadow-xl shadow-blue-100 relative overflow-hidden group hover:scale-[1.02] transition-all"
+            className="bg-blue-600 p-8 rounded-3xl text-left shadow-xl shadow-blue-100 dark:shadow-none relative overflow-hidden group hover:scale-[1.02] transition-all"
           >
             <div className="relative z-10">
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
@@ -1365,7 +1459,7 @@ function DashboardView({
 
           <button 
             onClick={() => setView('symptoms')} 
-            className="bg-emerald-600 p-8 rounded-3xl text-left shadow-xl shadow-emerald-100 relative overflow-hidden group hover:scale-[1.02] transition-all"
+            className="bg-emerald-600 p-8 rounded-3xl text-left shadow-xl shadow-emerald-100 dark:shadow-none relative overflow-hidden group hover:scale-[1.02] transition-all"
           >
             <div className="relative z-10">
               <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
@@ -1381,9 +1475,9 @@ function DashboardView({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-          <section className="wellness-card">
+          <section id="tour-intelligence-center" className="wellness-card bg-white dark:bg-[#1C2C33] border border-slate-100 dark:border-[#2C414C]">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-3">
+              <h3 className="text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-3">
                 <Zap size={18} className="text-amber-500 fill-amber-500" />
                 {t.intelligenceCenter}
               </h3>
@@ -1392,7 +1486,7 @@ function DashboardView({
                   title: "Vital Mind Intelligence", 
                   content: "Our rule-based system analyzes your emotional and physical logs over 14-day windows to detect trends and suggest medically-informed preventive actions."
                 })}
-                className="text-slate-300 hover:text-blue-500 transition-colors"
+                className="text-slate-300 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
               >
                 <Info size={14} />
               </button>
@@ -1422,9 +1516,9 @@ function DashboardView({
             </div>
           </section>
 
-          <section className="wellness-card border-blue-105/50 dark:border-[#2C414C] bg-blue-50/20 dark:bg-blue-950/10">
+          <section id="tour-preventive-care" className="wellness-card bg-blue-50/10 dark:bg-[#1C2C33] border border-blue-100/30 dark:border-[#2C414C]">
             <div className="flex justify-between items-center mb-8">
-              <h3 className="text-[12px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-3">
+              <h3 className="text-[12px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-3">
                 <Heart size={18} className="text-blue-500" />
                 {t.preventiveHealth}
               </h3>
@@ -1433,7 +1527,7 @@ function DashboardView({
                   title: "Preventive Care", 
                   content: "By monitoring physical markers like fatigue and sleep alongside mood, we help you identify early signs of burnout or health issues before they escalate."
                 })}
-                className="text-blue-300 hover:text-blue-600 transition-colors"
+                className="text-blue-400 dark:text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 <Info size={14} />
               </button>
@@ -1471,7 +1565,7 @@ function DashboardView({
       <div className="col-span-12 lg:col-span-4 flex flex-col gap-8">
         
         {/* Streak & Consistency Tracker */}
-        <section className="wellness-card border-l-4 border-l-amber-500 bg-amber-50/10 space-y-4">
+        <section className="wellness-card border-l-4 border-l-amber-500 bg-amber-50/10 dark:bg-amber-950/10 space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
               <Zap size={16} className="text-amber-500 fill-amber-500 animate-pulse" />
@@ -1481,36 +1575,36 @@ function DashboardView({
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black text-slate-950 tracking-tight leading-none">{streakVal}</span>
-            <span className="text-xs font-black uppercase text-slate-500">Days</span>
+            <span className="text-4xl font-black text-slate-950 dark:text-white tracking-tight leading-none">{streakVal}</span>
+            <span className="text-xs font-black uppercase text-slate-500 dark:text-slate-400">Days</span>
           </div>
 
-          <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+          <p className="text-xs text-slate-600 dark:text-slate-400 font-semibold leading-relaxed">
             {streakVal > 0 
               ? `You've checked in for ${streakVal} day${streakVal > 1 ? 's' : ''} straight! Consistency is wellness.` 
               : "Check in today to start your tracking streak! Keep reflecting daily."}
           </p>
 
-          <div className="flex items-center gap-2 border-t border-slate-100 pt-3">
-            <div className="text-[9px] text-slate-400 font-black uppercase tracking-wider">Milestone achievements:</div>
+          <div className="flex items-center gap-2 border-t border-slate-100 dark:border-[#2C414C] pt-3">
+            <div className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Milestone achievements:</div>
             <div className="flex gap-1">
-              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${streakVal >= 3 ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}`}>3D</span>
-              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${streakVal >= 7 ? 'bg-amber-500 text-white animate-bounce' : 'bg-slate-100 text-slate-400'}`}>7D</span>
-              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${streakVal >= 30 ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-400'}`}>30D</span>
+              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${streakVal >= 3 ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-[#18262C] text-slate-400 dark:text-slate-500'}`}>3D</span>
+              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${streakVal >= 7 ? 'bg-amber-500 text-white animate-bounce' : 'bg-slate-100 dark:bg-[#18262C] text-slate-400 dark:text-slate-500'}`}>7D</span>
+              <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded ${streakVal >= 30 ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-[#18262C] text-slate-400 dark:text-slate-500'}`}>30D</span>
             </div>
           </div>
         </section>
 
         {/* Anonymous Community Check-in Module */}
-        <section className="wellness-card space-y-4">
+        <section id="tour-peer-community" className="wellness-card bg-white/95 dark:bg-[#1C2C33] border border-slate-100 dark:border-[#2C414C] space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
               👤 Peer Community Check-in
             </h3>
-            <span className="text-[9px] text-emerald-600 font-black bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 animate-pulse uppercase tracking-wider">LIVE</span>
+            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-black bg-emerald-50 dark:bg-emerald-950/35 px-2 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/30 animate-pulse uppercase tracking-wider">LIVE</span>
           </div>
 
-          <p className="text-[10px] text-slate-400 font-bold leading-normal">Cast an anonymous ballot of your current emotional landscape. See how real peers worldwide are aligning today.</p>
+          <p className="text-[10px] text-slate-400 dark:text-[#a8b8c0] font-bold leading-normal">Cast an anonymous ballot of your current emotional landscape. See how real peers worldwide are aligning today.</p>
 
           <div className="space-y-2 pt-1">
             {communityOptions.map((opt) => {
@@ -1522,16 +1616,16 @@ function DashboardView({
                   onClick={() => submitVote(opt.key)}
                   className={`w-full text-left p-3.5 rounded-xl border transition-all relative overflow-hidden flex flex-col gap-1 ${
                     hasVoted 
-                      ? 'bg-emerald-50/50 border-emerald-500 text-emerald-900 group shadow-xs scale-101' 
+                      ? 'bg-emerald-50/50 border-emerald-500 text-emerald-900 dark:bg-emerald-950/25 dark:border-emerald-500 dark:text-emerald-300 group shadow-xs scale-101' 
                       : !!communityVote 
-                        ? 'bg-slate-50 border-slate-100 opacity-60 text-slate-400 cursor-default' 
-                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 cursor-pointer'
+                        ? 'bg-slate-50 border-slate-100 opacity-60 text-slate-400 dark:bg-[#18262C]/40 dark:border-[#2C414C] dark:text-slate-500 cursor-default' 
+                        : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 dark:bg-[#18262C] dark:hover:bg-[#203038] dark:border-[#2C414C] dark:text-slate-350 cursor-pointer'
                   }`}
                 >
                   {/* Progress bar background indicator */}
                   {!!communityVote && (
                     <div 
-                      className={`absolute left-0 top-0 bottom-0 ${hasVoted ? 'bg-emerald-500/10' : 'bg-slate-200/20'} transition-all`}
+                      className={`absolute left-0 top-0 bottom-0 ${hasVoted ? 'bg-emerald-500/10 dark:bg-emerald-500/20' : 'bg-slate-200/20 dark:bg-slate-700/10'} transition-all`}
                       style={{ width: `${opt.pct}%` }} 
                     />
                   )}
@@ -1544,7 +1638,7 @@ function DashboardView({
                   </div>
                   
                   {!!communityVote && (
-                    <span className="relative z-10 text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">
+                    <span className="relative z-10 text-[9px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
                       {opt.peersCount} {hasVoted ? '(You aligned here!)' : ''}
                     </span>
                   )}
@@ -1557,7 +1651,7 @@ function DashboardView({
             <div className="text-center pt-1">
               <button 
                 onClick={() => submitVote('')} 
-                className="text-[9px] font-black uppercase text-slate-400 hover:text-red-500 border-b border-dashed border-slate-300 hover:border-red-400 transition-colors"
+                className="text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 hover:text-red-500 border-b border-dashed border-slate-300 dark:border-[#2C414C] hover:border-red-400 transition-colors"
               >
                 Reset Check-in selection
               </button>
@@ -1596,14 +1690,14 @@ function DashboardView({
               <div key={log.id} className="flex items-start gap-4">
                 <div className="text-2xl pt-1">{getEmoji(log.mood)}</div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-sm">{log.mood}</h4>
+                  <h4 className="font-bold text-slate-900 dark:text-white text-sm">{log.mood}</h4>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
                     {resolveDate(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
               </div>
             ))}
-            <button onClick={() => setView('history')} className="w-full py-4 text-[10px] font-black text-blue-600 uppercase tracking-widest border-t border-slate-50 mt-2 hover:translate-x-1 transition-transform flex items-center justify-center gap-2">
+            <button onClick={() => setView('history')} className="w-full py-4 text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest border-t border-slate-50 dark:border-slate-800/50 mt-2 hover:translate-x-1 transition-transform flex items-center justify-center gap-2 cursor-pointer">
               Full History <ChevronRight size={14} />
             </button>
           </div>
@@ -1638,24 +1732,24 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
   const [activeCategory, setActiveCategory] = useState<'all' | 'positive' | 'reflective' | 'active'>('all');
 
   const positiveMoods: { type: MoodType, emoji: string, color: string; desc: string }[] = [
-    { type: 'Happy', emoji: '😊', color: 'bg-amber-500/10 text-amber-600 border-amber-500/30 ring-amber-400/20', desc: 'Savouring a bright moment' },
-    { type: 'Hopeful', emoji: '🌱', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 ring-emerald-400/20', desc: 'Looking forward with peace' },
-    { type: 'Calm', emoji: '😌', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30 ring-cyan-400/20', desc: 'Feeling grounded and light' },
-    { type: 'Neutral', emoji: '😐', color: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30 ring-slate-400/20', desc: 'Steady and balanced state' },
+    { type: 'Happy', emoji: '😊', color: 'bg-amber-500/10 text-amber-600 border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-500/30', desc: 'Savouring a bright moment' },
+    { type: 'Hopeful', emoji: '🌱', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-500/30', desc: 'Looking forward with peace' },
+    { type: 'Calm', emoji: '😌', color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30 dark:bg-cyan-950/20 dark:text-cyan-400 dark:border-cyan-500/30', desc: 'Feeling grounded and light' },
+    { type: 'Neutral', emoji: '😐', color: 'bg-slate-500/10 text-slate-600 dark:text-slate-300 border-slate-500/30 dark:bg-slate-800/35 dark:border-slate-700', desc: 'Steady and balanced state' },
   ];
 
   const reflectiveMoods: { type: MoodType, emoji: string, color: string; desc: string }[] = [
-    { type: 'Sad', emoji: '😢', color: 'bg-blue-500/10 text-blue-600 border-blue-500/30 ring-blue-400/20', desc: 'Carrying general sadness' },
-    { type: 'Tired', emoji: '🥱', color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/30 ring-indigo-400/20', desc: 'Exhausted or low on fuel' },
-    { type: 'Lonely', emoji: '👤', color: 'bg-slate-500/10 text-slate-500 border-slate-500/30 ring-slate-400/20', desc: 'Feeling isolated or apart' },
-    { type: 'Dissociated', emoji: '🌫️', color: 'bg-zinc-500/10 text-zinc-650 dark:text-zinc-400 border-zinc-500/30 ring-zinc-400/20', desc: 'Fuzzy or detached from now' },
+    { type: 'Sad', emoji: '😢', color: 'bg-blue-500/10 text-blue-600 border-blue-500/30 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-500/30', desc: 'Carrying general sadness' },
+    { type: 'Tired', emoji: '🥱', color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/30 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-500/30', desc: 'Exhausted or low on fuel' },
+    { type: 'Lonely', emoji: '👤', color: 'bg-slate-500/10 text-slate-500 border-slate-500/30 dark:bg-slate-800/35 dark:text-slate-400 dark:border-slate-700', desc: 'Feeling isolated or apart' },
+    { type: 'Dissociated', emoji: '🌫️', color: 'bg-zinc-500/10 text-zinc-650 dark:text-zinc-350 border-zinc-500/30 dark:bg-zinc-800/35 dark:border-zinc-700', desc: 'Fuzzy or detached from now' },
   ];
 
   const activeMoods: { type: MoodType, emoji: string, color: string; desc: string }[] = [
-    { type: 'Stressed', emoji: '😫', color: 'bg-orange-500/10 text-orange-600 border-orange-500/30 ring-orange-400/20', desc: 'Tension is crowding in' },
-    { type: 'Anxious', emoji: '😰', color: 'bg-purple-500/10 text-purple-600 border-purple-500/30 ring-purple-400/20', desc: 'Worry is active or heavy' },
-    { type: 'Angry', emoji: '😡', color: 'bg-rose-500/10 text-rose-600 border-rose-500/30 ring-rose-400/20', desc: 'Fretful, heated or irritated' },
-    { type: 'Fearful', emoji: '😨', color: 'bg-red-500/10 text-red-650 dark:text-red-400 border-red-500/30 ring-red-400/20', desc: 'Feeling unsafe or alarmed' },
+    { type: 'Stressed', emoji: '😫', color: 'bg-orange-500/10 text-orange-600 border-orange-500/30 dark:bg-orange-950/20 dark:text-orange-400 dark:border-orange-500/30', desc: 'Tension is crowding in' },
+    { type: 'Anxious', emoji: '😰', color: 'bg-purple-500/10 text-purple-600 border-purple-500/30 dark:bg-purple-950/20 dark:text-purple-400 dark:border-purple-500/30', desc: 'Worry is active or heavy' },
+    { type: 'Angry', emoji: '😡', color: 'bg-rose-500/10 text-rose-600 border-rose-500/30 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-500/30', desc: 'Fretful, heated or irritated' },
+    { type: 'Fearful', emoji: '😨', color: 'bg-red-500/10 text-red-650 dark:text-red-400 border-red-500/30 dark:bg-red-950/20 dark:border-red-500/30', desc: 'Feeling unsafe or alarmed' },
   ];
 
   const allMoods = [...positiveMoods, ...reflectiveMoods, ...activeMoods];
@@ -1792,7 +1886,7 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
             onClick={() => toggleMood(m.type)}
             className={`flex flex-col items-center justify-center p-6 rounded-[28px] transition-all border text-center cursor-pointer ${
               selectedMoods.includes(m.type) 
-                ? `${m.color} border-current ring-4 ring-emerald-500/10 scale-102 font-bold shadow-md` 
+                ? `${m.color} border-current border-2 scale-[1.01] font-bold shadow-sm` 
                 : 'bg-white dark:bg-[#1C2C33] text-slate-400 dark:text-[#a8b8c0] border-[#CCFBF1]/40 dark:border-[#2C414C] shadow-xs hover:scale-[1.02] hover:bg-slate-50/50 dark:hover:bg-[#1C2C33]/60'
             }`}
             style={{ minHeight: '120px' }}
@@ -1964,25 +2058,25 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
         <button
           type="button"
           onClick={() => toggle(s)}
-          className={`w-full p-5 bg-white border rounded-2xl flex justify-between items-center transition-all min-h-[56px] text-left active:scale-[0.99] ${
+          className={`w-full p-5 bg-white dark:bg-[#203038] border rounded-2xl flex justify-between items-center transition-all min-h-[56px] text-left active:scale-[0.99] cursor-pointer ${
             isSelected 
               ? isCrisisTag
-                ? 'bg-rose-50/50 border-rose-500 shadow-sm ring-2 ring-rose-500/10'
-                : 'bg-blue-50/50 border-blue-600 shadow-sm ring-2 ring-blue-600/10' 
-              : 'border-slate-100/80 hover:bg-slate-50 hover:border-slate-250'
+                ? 'bg-rose-50/30 dark:bg-rose-950/25 border-rose-500 shadow-sm'
+                : 'bg-blue-50/30 dark:bg-blue-950/25 border-blue-500 shadow-sm' 
+              : 'border-slate-100/80 dark:border-[#2C414C] hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-[#18262C]'
           }`}
         >
           <span className={`font-bold transition-all text-xs tracking-tight ${
             isSelected 
-              ? isCrisisTag ? 'text-rose-700' : 'text-blue-700' 
-              : 'text-slate-600'
+              ? isCrisisTag ? 'text-rose-700 dark:text-rose-400' : 'text-blue-700 dark:text-blue-400' 
+              : 'text-slate-600 dark:text-slate-350'
           }`}>
             {s}{isCrisisTag ? '*' : ''}
           </span>
           <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all shrink-0 ${
             isSelected 
               ? isCrisisTag ? 'bg-rose-600 border-rose-600 text-white' : 'bg-blue-600 border-blue-600 text-white'
-              : 'border-slate-200'
+              : 'border-slate-200 dark:border-slate-700'
           }`}>
             {isSelected && <CheckCircle2 size={14} />}
           </div>
@@ -1993,7 +2087,7 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
           <motion.div 
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-[11px] font-bold text-rose-800 leading-normal space-y-2"
+            className="p-3 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl text-[11px] font-bold text-rose-800 dark:text-rose-200 leading-normal space-y-2"
           >
             <p className="flex items-center gap-1.5 font-medium">
               <span className="text-rose-500 text-xs">❤️</span> Selecting this is okay. You're not alone.
@@ -2014,17 +2108,17 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <section>
-        <button onClick={onComplete} className="text-slate-400 mb-6 hover:text-slate-600 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+        <button onClick={onComplete} className="text-slate-400 mb-6 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-2 text-xs font-black uppercase tracking-widest cursor-pointer">
           <ChevronRight className="rotate-180" size={16} /> Back to Dashboard
         </button>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase mb-2">Symptom Log</h1>
-        <p className="text-slate-500 font-medium italic">Select any markers present in your current state. All items tracked confidentially.</p>
+        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mb-2">Symptom Log</h1>
+        <p className="text-slate-500 dark:text-slate-400 font-medium italic">Select any markers present in your current state. All items tracked confidentially.</p>
       </section>
 
       <div className="space-y-10">
         {/* Mental / Emotional Section */}
         <section className="space-y-4">
-          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] border-b border-slate-100 pb-2">Mental & Emotional Indicators</h3>
+          <h3 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] border-b border-slate-100 dark:border-slate-800/80 pb-2">Mental & Emotional Indicators</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {mentalEmotionalSymptoms.map(s => renderSymptomChip(s))}
           </div>
@@ -2032,7 +2126,7 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
 
         {/* Physical Section */}
         <section className="space-y-4">
-          <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] border-b border-slate-100 pb-2">Physical & Somatic Indicators</h3>
+          <h3 className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em] border-b border-slate-100 dark:border-slate-800/80 pb-2">Physical & Somatic Indicators</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {physicalSymptoms.map(s => renderSymptomChip(s))}
           </div>
@@ -2193,7 +2287,7 @@ function HistoryView({
     doc.setTextColor(71, 85, 105); // Slate-600
     doc.text(`Full Record ID: ${user?.uid || 'Guest Master'}`, 20, 52);
     doc.text(`Patient Name: ${user?.displayName || 'Guest User'}`, 20, 58);
-    doc.text(`Assigned Age: ${profile?.age || 'Not provided'} • Current Streak: ${streak} days`, 20, 64);
+    doc.text(`Assigned Age: ${profile?.dob ? calculateAge(profile.dob) : (profile?.age || 'Not provided')} • Current Streak: ${streak} days`, 20, 64);
     
     // Insights Section
     doc.setFontSize(12);
@@ -2399,13 +2493,14 @@ function HistoryView({
       <div className="flex border-b border-slate-100 dark:border-slate-800 overflow-x-auto pb-px gap-2">
         <button 
           onClick={() => setActiveTab('symptoms')}
-          className={`pb-3 px-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer ${activeTab === 'symptoms' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 font-extrabold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-250'}`}
+          className={`pb-3 px-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer ${activeTab === 'symptoms' ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400 font-extrabold' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           Symptoms Only
         </button>
         <button 
+          id="tour-wellness-reports"
           onClick={() => setActiveTab('reports')}
-          className={`pb-3 px-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer ${activeTab === 'reports' ? 'border-purple-600 text-purple-700 dark:text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-250'}`}
+          className={`pb-3 px-4 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 cursor-pointer ${activeTab === 'reports' ? 'border-purple-600 text-purple-700 dark:text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
         >
           Intelligence Reports
         </button>
@@ -2413,14 +2508,14 @@ function HistoryView({
 
       {/* FILTER CONTROL (Only shown on Symptoms tab) */}
       {activeTab === 'symptoms' && (
-        <section className="bg-slate-50 border border-slate-100 p-6 rounded-3xl space-y-6">
+        <section className="bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] p-6 rounded-3xl space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Date Range</label>
+              <label className="text-[9px] font-black text-slate-400 dark:text-slate-450 uppercase tracking-widest px-1">Date Range</label>
               <select
                 value={filterRange}
                 onChange={(e) => setFilterRange(Number(e.target.value))}
-                className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 font-bold text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600/15 cursor-pointer"
+                className="w-full bg-white dark:bg-[#203038] border border-slate-200 dark:border-[#2C414C] rounded-xl py-3 px-4 font-bold text-xs text-slate-700 dark:text-[#E3ECF0] focus:outline-none focus:ring-2 focus:ring-blue-600/15 cursor-pointer"
               >
                 <option value={7}>Last 7 Days</option>
                 <option value={30}>Last 30 Days</option>
@@ -2438,7 +2533,7 @@ function HistoryView({
         {activeTab === 'symptoms' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredSymptomLogs.length === 0 ? (
-              <div className="col-span-full text-center py-20 text-slate-400 font-bold uppercase tracking-widest italic border-2 border-dashed border-slate-100 rounded-3xl bg-white">
+              <div className="col-span-full text-center py-20 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest italic border-2 border-dashed border-slate-100 dark:border-[#2C414C] rounded-3xl bg-white dark:bg-[#203038]">
                 No matching physical indicator logs found.
               </div>
             ) : (
@@ -2446,7 +2541,7 @@ function HistoryView({
                 <div key={log.id} className="wellness-card space-y-4 hover:translate-y-[-2px] transition-transform flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-baseline mb-4">
-                      <h4 className="font-black text-slate-900 uppercase tracking-tighter">Symptom Markers</h4>
+                      <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Symptom Markers</h4>
                       <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{formatDate(log.timestamp)}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -2458,8 +2553,8 @@ function HistoryView({
                           return (
                             <span key={s} className={`text-[10px] font-black px-3 py-1.5 rounded-lg border uppercase tracking-wider ${
                               isCrisis 
-                                ? 'bg-rose-50 border-rose-200 text-rose-600'
-                                : 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                                ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400'
+                                : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
                             }`}>
                               {s}{isCrisis ? '*' : ''}
                             </span>
@@ -2477,15 +2572,15 @@ function HistoryView({
         {/* TAB 3: Intelligence Reports */}
         {activeTab === 'reports' && (
           <div className="space-y-6">
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 space-y-6 shadow-xs">
+            <div className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] rounded-3xl p-6 md:p-8 space-y-6 shadow-xs">
               
               {/* Period selection */}
-              <div className="flex justify-between items-center bg-slate-50 p-1 rounded-xl max-w-xs border border-slate-100">
+              <div className="flex justify-between items-center bg-slate-50 dark:bg-[#18262C] p-1 rounded-xl max-w-xs border border-slate-100 dark:border-[#2C414C]">
                 <button
                   type="button"
                   onClick={() => setReportPeriod('weekly')}
                   className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all ${
-                    reportPeriod === 'weekly' ? 'bg-white text-purple-700 shadow-xs border border-slate-100' : 'text-slate-400 hover:text-slate-700'
+                    reportPeriod === 'weekly' ? 'bg-white dark:bg-[#203038] text-purple-700 dark:text-purple-400 shadow-xs border border-slate-100 dark:border-[#2C414C]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-350'
                   }`}
                 >
                   Weekly Summary
@@ -2494,54 +2589,52 @@ function HistoryView({
                   type="button"
                   onClick={() => setReportPeriod('monthly')}
                   className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all ${
-                    reportPeriod === 'monthly' ? 'bg-white text-purple-700 shadow-xs border border-slate-100' : 'text-slate-400 hover:text-slate-700'
+                    reportPeriod === 'monthly' ? 'bg-white dark:bg-[#203038] text-purple-700 dark:text-purple-400 shadow-xs border border-slate-100 dark:border-[#2C414C]' : 'text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-350'
                   }`}
                 >
                   Monthly Summary
                 </button>
               </div>
 
-              {/* Aggregated insights panel */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Score */}
-                <div className="p-6 bg-purple-50/50 border border-purple-100/50 rounded-2xl space-y-2">
-                  <h4 className="text-[9px] font-black uppercase tracking-widest text-purple-600">Total Check-ins</h4>
-                  <p className="text-3xl font-black text-slate-900">{analytics.totalLogsCount}</p>
-                  <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                <div className="p-6 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100/50 dark:border-purple-900/40 rounded-2xl space-y-2">
+                  <h4 className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">Total Check-ins</h4>
+                  <p className="text-3xl font-black text-slate-900 dark:text-white">{analytics.totalLogsCount}</p>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
                     Successful mappings logged in chosen period.
                   </p>
                 </div>
 
                 {/* Dominant Mood */}
-                <div className="p-6 bg-blue-50/50 border border-blue-100/50 rounded-2xl space-y-2">
-                  <h4 className="text-[9px] font-black uppercase tracking-widest text-blue-600">Dominant Emotion</h4>
-                  <p className="text-2xl font-black text-slate-900 flex items-center gap-1.5 truncate">
+                <div className="p-6 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/40 rounded-2xl space-y-2">
+                  <h4 className="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">Dominant Emotion</h4>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
                     {analytics.dominantMood !== 'None' ? (
                       <>
                         <span>{getEmoji(analytics.dominantMood)}</span>
                         <span>{analytics.dominantMood}</span>
                       </>
                     ) : (
-                      <span className="text-slate-400 font-bold italic">No data</span>
+                      <span className="text-slate-400 dark:text-slate-500 font-bold italic">No data</span>
                     )}
                   </p>
-                  <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
                     Most frequently tracked emotional frequency.
                   </p>
                 </div>
 
                 {/* Frequency */}
-                <div className="p-6 bg-emerald-50/50 border border-emerald-100/50 rounded-2xl space-y-2">
-                  <h4 className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Top Physical Indicator</h4>
-                  <p className="text-lg font-black text-slate-900 truncate flex items-center gap-1.5">
+                <div className="p-6 bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/50 dark:border-emerald-900/40 rounded-2xl space-y-2">
+                  <h4 className="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Top Physical Indicator</h4>
+                  <p className="text-lg font-black text-slate-900 dark:text-white truncate flex items-center gap-1.5">
                     {analytics.frequentSymptoms && analytics.frequentSymptoms.length > 0 ? (
                       <span>🟢 {analytics.frequentSymptoms[0]}</span>
                     ) : (
-                      <span className="text-slate-400 font-bold italic">No physical records</span>
+                      <span className="text-slate-400 dark:text-slate-500 font-bold italic">No physical records</span>
                     )}
                   </p>
-                  <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
                     Most recurrent physical alignment.
                   </p>
                 </div>
@@ -2549,23 +2642,23 @@ function HistoryView({
               </div>
 
               {/* Actionable insight box */}
-              <div className="border border-slate-100 bg-slate-50 rounded-2xl p-6 space-y-3.5">
+              <div className="border border-slate-100 dark:border-[#2C414C] bg-slate-50 dark:bg-[#18262C] rounded-2xl p-6 space-y-3.5">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center">
                     <Zap size={14} />
                   </div>
                   <div>
-                    <h5 className="text-xs font-black uppercase text-slate-900">Preventive Actionable Insight</h5>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Automated clinical rule mapping translation</p>
+                    <h5 className="text-xs font-black uppercase text-slate-900 dark:text-white">Preventive Actionable Insight</h5>
+                    <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Automated clinical rule mapping translation</p>
                   </div>
                 </div>
                 
-                <p className="text-sm text-slate-700 font-semibold leading-relaxed">
+                <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold leading-relaxed">
                   {analytics.actionableInsight}
                 </p>
 
-                <div className="border-t border-slate-200/50 pt-3" />
-                <div className="flex items-start gap-2 text-[10px] text-slate-400 leading-normal font-medium italic">
+                <div className="border-t border-slate-200/50 dark:border-[#2C414C] pt-3" />
+                <div className="flex items-start gap-2 text-[10px] text-slate-400 dark:text-slate-500 leading-normal font-medium italic">
                   <span>ℹ️ Inspected from raw data patterns. Sharing these trends with your counselor during sessions helps bridge diagnostic loops and speeds up intervention cycles.</span>
                 </div>
               </div>
@@ -2592,13 +2685,13 @@ function ResourcesView({
 }) {
   return (
     <div className="space-y-12">
-      <button onClick={onBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
+      <button onClick={onBack} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
         <ChevronRight className="rotate-180" size={16} /> Back to Dashboard
       </button>
 
       <section>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase mb-2">Help Library</h1>
-        <p className="text-slate-500 font-medium italic">Verified mental health and preventive healthcare resources for Nigerians.</p>
+        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mb-2">Help Library</h1>
+        <p className="text-slate-500 dark:text-slate-400 font-medium italic">Verified mental health and preventive healthcare resources for Nigerians.</p>
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
@@ -2606,12 +2699,12 @@ function ResourcesView({
           <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] px-1">Crisis Helplines</h3>
           <div className="space-y-4">
             {HELPLINES.map(h => (
-              <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="wellness-card flex items-center justify-between hover:bg-blue-50 group border-slate-100">
+              <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="wellness-card flex items-center justify-between hover:bg-blue-50 dark:hover:bg-[#1C2C33]/50 group border-slate-100 dark:border-[#2C414C]">
                 <div className="space-y-1">
-                  <h4 className="font-black text-slate-900 uppercase tracking-tighter">{h.name}</h4>
+                  <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">{h.name}</h4>
                   <p className="text-sm text-blue-600 font-bold tracking-tighter">{h.number}</p>
                 </div>
-                <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                <div className="w-12 h-12 bg-slate-50 dark:bg-[#18262C] rounded-xl flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white transition-all">
                   <Phone size={20} />
                 </div>
               </a>
@@ -2623,22 +2716,22 @@ function ResourcesView({
           <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em] px-1">Healthcare Toolkits</h3>
           <div className="grid grid-cols-1 gap-4">
             {RESOURCES.map(r => (
-              <div key={r.title} className="wellness-card bg-emerald-50/20 border-emerald-100/50">
+              <div key={r.title} className="wellness-card bg-emerald-50/20 dark:bg-emerald-950/10 border-emerald-100/50 dark:border-emerald-900/50">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white rounded-lg text-emerald-600 shadow-sm">
+                    <div className="p-2 bg-white dark:bg-[#1C2C33] rounded-lg text-emerald-600 dark:text-emerald-400 shadow-sm">
                       <Activity size={18} />
                     </div>
-                    <h4 className="font-black text-slate-900 uppercase tracking-tighter">{r.title}</h4>
+                    <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">{r.title}</h4>
                   </div>
                   <button 
                     onClick={() => setModalInfo({ title: r.title, content: `${r.content} This information is based on public health guidelines for young adults in Nigeria.` })}
-                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    className="p-2 text-slate-400 dark:text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-[#18262C] rounded-lg transition-all"
                   >
                     <Info size={18} />
                   </button>
                 </div>
-                <p className="text-sm text-slate-600 leading-relaxed font-medium">{r.content}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{r.content}</p>
                 {r.fullGuide && (
                   <button 
                     onClick={() => window.open(r.fullGuide, '_blank')}
@@ -2673,6 +2766,7 @@ function ProfileEditView({
   easyMode,
   setEasyMode,
   speakText,
+  triggerTour,
   onBack 
 }: { 
   profile: any, 
@@ -2691,11 +2785,26 @@ function ProfileEditView({
   easyMode?: boolean,
   setEasyMode?: (val: boolean) => void,
   speakText?: (text: string) => void,
+  triggerTour?: () => void,
   onBack: () => void 
 }) {
   const t = TRANSLATIONS[systemLocale as Locale] || TRANSLATIONS['en'];
   const [name, setName] = useState(profile?.name || '');
-  const [age, setAge] = useState(profile?.age?.toString() || '');
+  const [dob, setDob] = useState(profile?.dob || '');
+  const [age, setAge] = useState(() => {
+    if (profile?.dob) return calculateAge(profile.dob).toString();
+    return profile?.age?.toString() || '';
+  });
+
+  const handleDobChange = (val: string) => {
+    setDob(val);
+    if (val) {
+      setAge(calculateAge(val).toString());
+    } else {
+      setAge('');
+    }
+  };
+
   const [partnerName, setPartnerName] = useState(profile?.wellnessPartnerName || '');
   const [partnerEmail, setPartnerEmail] = useState(profile?.wellnessPartnerEmail || '');
   const [reminderEnabled, setReminderEnabled] = useState(profile?.reminderEnabled !== false);
@@ -2777,9 +2886,13 @@ function ProfileEditView({
   };
 
   const handleSave = async () => {
-    const parsedAge = parseInt(age);
+    if (!dob) {
+      alert("Please select your Date of Birth.");
+      return;
+    }
+    const parsedAge = calculateAge(dob);
     if (!name || isNaN(parsedAge) || parsedAge < 15 || parsedAge > 35) {
-      alert("Please provide a valid name and age (15-35).");
+      alert(`Under current requirements, your computed age must be between 15 and 35 years based on your date of birth (Current age calculated: ${parsedAge || 0} years).`);
       return;
     }
 
@@ -2792,6 +2905,7 @@ function ProfileEditView({
           ...localProfile,
           name,
           age: parsedAge,
+          dob,
           wellnessPartnerName: partnerName,
           wellnessPartnerEmail: partnerEmail,
           reminderEnabled,
@@ -2808,6 +2922,7 @@ function ProfileEditView({
       await setDoc(doc(db, path), {
         name,
         age: parsedAge,
+        dob,
         wellnessPartnerName: partnerName,
         wellnessPartnerEmail: partnerEmail,
         reminderEnabled,
@@ -2901,8 +3016,8 @@ function ProfileEditView({
         </div>
         
         {/* Basic Information section */}
-        <div className="bg-white border border-slate-100 p-6 rounded-3xl space-y-6 shadow-xs">
-          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] border-b border-slate-50 pb-2">Basic Information</h3>
+        <div className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] p-6 rounded-3xl space-y-6 shadow-xs">
+          <h3 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] border-b border-slate-50 dark:border-[#2C414C] pb-2">Basic Information</h3>
           <div className="space-y-3">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Display Name</label>
             <input 
@@ -2914,38 +3029,39 @@ function ProfileEditView({
             />
           </div>
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Age (15-35)</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1 flex justify-between items-center w-full">
+              <span>Date of Birth</span>
+              {age && <span className="text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] shrink-0">({age} yrs)</span>}
+            </label>
             <input 
-              type="number" 
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              className="input-field py-3.5 px-4 font-bold"
-              min="15"
-              max="35"
+              type="date" 
+              value={dob}
+              onChange={(e) => handleDobChange(e.target.value)}
+              className="input-field py-3.5 px-4 font-bold w-full"
               required
             />
           </div>
         </div>
 
         {/* FEATURE 4: Emergency Safety Trusted Contacts list */}
-        <div className="bg-white border border-slate-100 p-6 rounded-3xl space-y-6 shadow-xs">
-          <div className="flex justify-between items-center border-b border-slate-50 pb-2">
-            <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">{t.trustedContact}</h3>
+        <div className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] p-6 rounded-3xl space-y-6 shadow-xs">
+          <div className="flex justify-between items-center border-b border-slate-50 dark:border-[#2C414C] pb-2">
+            <h3 className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em]">{t.trustedContact}</h3>
             <button
               type="button"
               onClick={() => setIsAddingContact(!isAddingContact)}
-              className="py-1.5 px-3 bg-emerald-50 text-[10px] text-emerald-700 hover:bg-emerald-100 border border-emerald-100 rounded-lg font-black uppercase tracking-wider transition-colors cursor-pointer"
+              className="py-1.5 px-3 bg-emerald-50 dark:bg-emerald-950/20 text-[10px] text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 border border-emerald-100 dark:border-emerald-900 rounded-lg font-black uppercase tracking-wider transition-colors cursor-pointer"
             >
               {isAddingContact ? 'Hide Form' : 'Add Contact'}
             </button>
           </div>
           
-          <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+          <p className="text-xs text-slate-400 dark:text-slate-400/90 font-semibold leading-relaxed">
             Registered safety conduits receive priority display details during distressed episodes in Crisis Support mode. Add up to 3 trusted agents.
           </p>
 
           {isAddingContact && (
-            <form onSubmit={handleSaveContact} className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 space-y-4">
+            <form onSubmit={handleSaveContact} className="bg-slate-50/50 dark:bg-[#1C2C33]/50 p-5 rounded-2xl border border-slate-100 dark:border-[#2C414C] space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="space-y-1">
                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-0.5">Contact Full Name</label>
@@ -3006,27 +3122,27 @@ function ProfileEditView({
 
           <div className="space-y-3">
             {safetyContacts.length === 0 ? (
-              <div className="text-center py-6 text-slate-400 font-bold uppercase tracking-widest italic text-xs border border-dashed border-slate-100 rounded-2xl bg-slate-50/20">
+              <div className="text-center py-6 text-slate-400 font-bold uppercase tracking-widest italic text-xs border border-dashed border-slate-100 dark:border-[#2C414C] rounded-2xl bg-slate-50/20 dark:bg-[#1C2C33]/20">
                 No safety companions listed yet.
               </div>
             ) : (
               safetyContacts.map(con => (
-                <div key={con.id} className="flex items-center justify-between p-4 border border-slate-100 bg-slate-50/50 rounded-2xl shadow-xs">
+                <div key={con.id} className="flex items-center justify-between p-4 border border-slate-100 dark:border-[#2C414C] bg-slate-50/50 dark:bg-[#1C2C33]/50 rounded-2xl shadow-xs">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-lg flex items-center justify-center font-black text-sm shrink-0">
+                    <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 text-emerald-700 dark:text-emerald-400 rounded-lg flex items-center justify-center font-black text-sm shrink-0">
                       👤
                     </div>
                     <div>
-                      <h4 className="font-extrabold text-xs text-slate-900">{con.name || con.contactName || 'Safety Companion'}</h4>
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-0.5">{con.relationship} — {con.phone}</p>
-                      {con.email && <span className="text-[9px] text-slate-500 font-mono italic leading-none">{con.email}</span>}
+                      <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">{con.name || con.contactName || 'Safety Companion'}</h4>
+                      <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">{con.relationship} — {con.phone}</p>
+                      {con.email && <span className="text-[9px] text-slate-500 dark:text-slate-400 font-mono italic leading-none">{con.email}</span>}
                     </div>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => deleteSafetyContact(con.id)}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all cursor-pointer"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -3037,24 +3153,24 @@ function ProfileEditView({
         </div>
 
         {/* FEATURE 8: Medication / Supplement reminder alerts list */}
-        <div className="bg-white border border-slate-100 p-6 rounded-3xl space-y-6 shadow-xs">
-          <div className="flex justify-between items-center border-b border-slate-50 pb-2">
-            <h3 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">{t.medReminder}</h3>
+        <div className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] p-6 rounded-3xl space-y-6 shadow-xs">
+          <div className="flex justify-between items-center border-b border-slate-50 dark:border-[#2C414C] pb-2">
+            <h3 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em]">{t.medReminder}</h3>
             <button
               type="button"
               onClick={() => setIsAddingMed(!isAddingMed)}
-              className="py-1.5 px-3 bg-indigo-50 text-[10px] text-indigo-700 hover:bg-indigo-100 border border-indigo-100 rounded-lg font-black uppercase tracking-wider transition-colors cursor-pointer"
+              className="py-1.5 px-3 bg-indigo-50 dark:bg-indigo-950/20 text-[10px] text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900 rounded-lg font-black uppercase tracking-wider transition-colors cursor-pointer"
             >
               {isAddingMed ? 'Hide Form' : 'Add Medication Alert'}
             </button>
           </div>
 
-          <p className="text-xs text-slate-400 font-semibold leading-relaxed">
+          <p className="text-xs text-slate-400 dark:text-slate-400/90 font-semibold leading-relaxed">
             Configure alarms for preventive routines, clinical medicines, or dietary supplements to ensure high longitudinal discipline indices.
           </p>
 
           {isAddingMed && (
-            <form onSubmit={handleSaveMedication} className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 space-y-4">
+            <form onSubmit={handleSaveMedication} className="bg-slate-50/50 dark:bg-[#1C2C33]/55 p-5 rounded-2xl border border-slate-100 dark:border-[#2C414C] space-y-4">
               <div className="space-y-1">
                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-0.5">Medication Name & Dosage</label>
                 <input
@@ -3073,7 +3189,7 @@ function ProfileEditView({
                   <select
                     value={medInterval}
                     onChange={(e) => setMedInterval(e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 font-semibold text-xs text-slate-700 focus:outline-none"
+                    className="w-full bg-white dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] rounded-xl py-2.5 px-3 font-semibold text-xs text-slate-700 dark:text-[#E3ECF0] focus:outline-none"
                   >
                     <option value="Daily">Once Daily</option>
                     <option value="Twice Daily">Twice Daily</option>
@@ -3103,17 +3219,17 @@ function ProfileEditView({
 
           <div className="space-y-3">
             {medReminders.length === 0 ? (
-              <div className="text-center py-6 text-slate-400 font-bold uppercase tracking-widest italic text-xs border border-dashed border-slate-100 rounded-2xl bg-slate-50/20">
+              <div className="text-center py-6 text-slate-400 font-bold uppercase tracking-widest italic text-xs border border-dashed border-slate-100 dark:border-[#2C414C] rounded-2xl bg-slate-50/20 dark:bg-[#1C2C33]/20">
                 No medication reminders scheduled.
               </div>
             ) : (
               medReminders.map(rem => (
-                <div key={rem.id} className="flex items-center justify-between p-4 border border-slate-100 bg-slate-50/50 rounded-2xl shadow-xs">
+                <div key={rem.id} className="flex items-center justify-between p-4 border border-slate-100 dark:border-[#2C414C] bg-slate-50/50 dark:bg-[#1C2C33]/50 rounded-2xl shadow-xs">
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={() => toggleMedicationReminder(rem.id, rem.enabled)}
-                      className={`w-9 h-6 rounded-full p-1 transition-colors relative shrink-0 border ${rem.enabled ? 'bg-indigo-600 border-indigo-600' : 'bg-slate-200 border-slate-300'}`}
+                      className={`w-9 h-6 rounded-full p-1 transition-colors relative shrink-0 border ${rem.enabled ? 'bg-indigo-600 border-indigo-600' : 'bg-slate-200 border-slate-300 dark:bg-[#18262C] dark:border-[#2C414C]'}`}
                       title={rem.enabled ? "Turn Off" : "Turn On"}
                     >
                       <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transition-all ${rem.enabled ? 'translate-x-3' : 'translate-x-0'}`} />
@@ -3129,7 +3245,7 @@ function ProfileEditView({
                   <button
                     type="button"
                     onClick={() => deleteMedicationReminder(rem.id)}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-all cursor-pointer"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -3140,20 +3256,20 @@ function ProfileEditView({
         </div>
 
         {/* Daily Reminder Cadence */}
-        <div className="bg-white border border-slate-100 p-6 rounded-3xl space-y-6 shadow-xs">
-          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] border-b border-slate-50 pb-2">Daily Check-in Alerts</h3>
+        <div className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] p-6 rounded-3xl space-y-6 shadow-xs">
+          <h3 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] border-b border-slate-50 dark:border-[#2C414C] pb-2">Daily Check-in Alerts</h3>
           
           {permissionState === 'denied' && (
-            <div className="p-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl flex items-center gap-3 text-xs font-bold leading-relaxed shadow-sm pb-2">
+            <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 text-amber-900 dark:text-amber-200 rounded-2xl flex items-center gap-3 text-xs font-bold leading-relaxed shadow-sm pb-2">
               <AlertCircle className="text-amber-600 shrink-0" size={18} />
               <span>Enable notifications to receive daily check-in reminders. If requested, grant permissions in your browser address bar.</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between p-6 bg-slate-50/50 border border-slate-100 rounded-2xl shadow-xs">
+          <div className="flex items-center justify-between p-6 bg-slate-50/50 dark:bg-[#1C2C33]/50 border border-slate-100 dark:border-[#2C414C] rounded-2xl shadow-xs">
             <div className="space-y-1">
-              <h4 className="font-bold text-slate-900 text-sm">Self-Care Reminders</h4>
-              <p className="text-xs text-slate-500 font-semibold font-medium">Receive a gentle prompt to map your wellness daily.</p>
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Self-Care Reminders</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold font-medium">Receive a gentle prompt to map your wellness daily.</p>
             </div>
             <button
               type="button"
@@ -3164,7 +3280,7 @@ function ProfileEditView({
                   requestPermission();
                 }
               }}
-              className={`w-12 h-6 rounded-full p-1 transition-colors relative shrink-0 ${reminderEnabled ? 'bg-blue-600' : 'bg-slate-200'}`}
+              className={`w-12 h-6 rounded-full p-1 transition-colors relative shrink-0 border ${reminderEnabled ? 'bg-blue-600 border-blue-600' : 'bg-slate-200 border-slate-300 dark:bg-[#18262C] dark:border-[#2C414C]'}`}
             >
               <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${reminderEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
             </button>
@@ -3186,22 +3302,70 @@ function ProfileEditView({
                 />
               </div>
 
-              <div className="p-6 bg-slate-50 border border-slate-100/60 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-xs">
+              <div className="p-6 bg-slate-50 dark:bg-[#18262C] border border-slate-100/60 dark:border-[#2C414C] rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-xs">
                 <div className="space-y-1">
-                  <h5 className="font-black text-slate-900 text-[10px] uppercase tracking-wider">Test Reminder Setup</h5>
-                  <p className="text-[11px] text-slate-500 font-medium font-semibold">Verify how notification popups arrive instantly on your device.</p>
+                  <h5 className="font-black text-slate-900 dark:text-white text-[10px] uppercase tracking-wider">Test Reminder Setup</h5>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium font-semibold">Verify how notification popups arrive instantly on your device.</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleSendTestNotification}
                   disabled={testSent}
-                  className="py-3 px-5 text-[9px] font-black uppercase tracking-widest text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 rounded-xl transition-all shrink-0 cursor-pointer"
+                  className="py-3 px-5 text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-[#E3ECF0] bg-white dark:bg-[#203038] border border-slate-200 dark:border-[#2C414C] hover:bg-slate-50 dark:hover:bg-[#2a3c46] hover:border-slate-300 dark:hover:border-[#354D59] rounded-xl transition-all shrink-0 cursor-pointer"
                 >
                   {testSent ? 'Fired! ✨' : 'Test Trigger'}
                 </button>
               </div>
             </motion.div>
           )}
+        </div>
+
+        {/* Accessibility & Walkthrough Replay Tour Settings */}
+        <div id="tour-accessibility-replay" className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] p-6 rounded-3xl space-y-6 shadow-xs">
+          <h3 className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em] border-b border-slate-50 dark:border-[#2C414C] pb-2">Accessibility & App Assistant Guidance</h3>
+          
+          <div className="flex items-center justify-between p-6 bg-slate-50/50 dark:bg-[#1C2C33]/50 border border-slate-100 dark:border-[#2C414C] rounded-2xl shadow-xs">
+            <div className="space-y-1">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Easy Read & Volume Assistance</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">Simplifies layouts and reads clinical highlights for low digital literacy or reading needs.</p>
+            </div>
+            <button
+              type="button"
+              id="settings-easy-mode-btn"
+              onClick={() => {
+                if (setEasyMode) {
+                  const val = !easyMode;
+                  setEasyMode(val);
+                  localStorage.setItem('vitalmind_easy_mode', val ? 'true' : 'false');
+                  if (val && speakText) {
+                    speakText("Easy read voice helper active.");
+                  }
+                }
+              }}
+              className={`w-12 h-6 rounded-full p-1 transition-colors relative shrink-0 border ${easyMode ? 'bg-[#10B981] border-[#10B981]' : 'bg-slate-200 border-slate-300 dark:bg-[#18262C] dark:border-[#2C414C]'}`}
+            >
+              <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-xs transition-all ${easyMode ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-6 bg-slate-50/50 dark:bg-[#1C2C33]/50 border border-slate-100 dark:border-[#2C414C] rounded-2xl shadow-xs">
+            <div className="space-y-1">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm">Interactive Walkthrough Tour</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">Want to learn how the dashboard, mood logging, reports, and community systems work?</p>
+            </div>
+            <button
+              type="button"
+              id="replay-tour-btn"
+              onClick={() => {
+                if (triggerTour) {
+                  triggerTour();
+                }
+              }}
+              className="py-2 px-4 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 hover:text-white dark:hover:text-white bg-emerald-50 dark:bg-[#18262C] hover:bg-emerald-600 dark:hover:bg-emerald-500 border border-emerald-100 dark:border-[#2C414C] rounded-xl transition-all cursor-pointer"
+            >
+              Replay Tour
+            </button>
+          </div>
         </div>
       </div>
 
@@ -3227,18 +3391,18 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
           <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-red-100 animate-pulse">
             <AlertCircle size={24} />
           </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Crisis Support</h1>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Crisis Support</h1>
         </div>
-        <p className="text-slate-500 font-medium italic text-lg">You don't have to carry this alone. Please reach out to one of these verified resources now.</p>
+        <p className="text-slate-500 dark:text-slate-400 font-medium italic text-lg">You don't have to carry this alone. Please reach out to one of these verified resources now.</p>
       </section>
 
       {/* Primary User Safety Contacts List */}
       {safetyContacts.length > 0 && (
-        <section className="bg-red-50/20 border-2 border-red-100 rounded-[32px] p-6 md:p-8 space-y-6">
+        <section className="bg-red-50/20 dark:bg-red-950/10 border-2 border-red-100 dark:border-red-900/30 rounded-[32px] p-6 md:p-8 space-y-6">
           <div className="flex items-center gap-2">
             <span className="text-lg">🛡️</span>
             <div>
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest leading-none">Your Safety Circle</h3>
+              <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest leading-none">Your Safety Circle</h3>
               <p className="text-[10px] text-slate-400 font-bold block mt-1.5 uppercase tracking-wider">PRE-CONFIGURED COMPANIONS & DISPATCHERS</p>
             </div>
           </div>
@@ -3248,16 +3412,16 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
               const displayName = con.name || con.contactName || 'Safety Companion';
               const silentSmsBody = encodeURIComponent(`Hi ${displayName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from VitalMind)`);
               return (
-                <div key={con.id} className="bg-white border border-red-100 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
+                <div key={con.id} className="bg-white dark:bg-[#203038] border border-red-100 dark:border-red-900/30 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
                   <div>
-                    <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-50 border border-red-100 px-2 py-0.5 rounded-md">
+                    <span className="text-[9px] font-black text-red-500 uppercase tracking-wider bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 px-2 py-0.5 rounded-md">
                       {con.relationship}
                     </span>
-                    <h4 className="font-extrabold text-slate-900 text-sm mt-2">{displayName}</h4>
-                    <p className="text-xs text-slate-500 font-mono mt-0.5">{con.phone}</p>
+                    <h4 className="font-extrabold text-slate-900 dark:text-white text-sm mt-2">{displayName}</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{con.phone}</p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 border-t border-slate-50 pt-3">
+                  <div className="grid grid-cols-2 gap-2 border-t border-slate-50 dark:border-slate-800/60 pt-3">
                     <a
                       href={`tel:${con.phone.replace(/\s/g, '')}`}
                       className="py-3 px-4 bg-red-600 text-white rounded-lg flex items-center justify-center gap-1.5 hover:bg-red-700 font-black text-[9px] uppercase tracking-wider transition-colors shadow-sm"
@@ -3266,7 +3430,7 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
                     </a>
                     <a
                       href={`sms:${con.phone.replace(/\s/g, '')}?body=${silentSmsBody}`}
-                      className="py-3 px-4 bg-slate-900 text-white rounded-lg flex items-center justify-center gap-1.5 hover:bg-slate-800 font-black text-[9px] uppercase tracking-wider transition-colors shadow-sm"
+                      className="py-3 px-4 bg-slate-900 dark:bg-[#18262C] text-white rounded-lg flex items-center justify-center gap-1.5 hover:bg-slate-800 dark:hover:bg-[#203038] font-black text-[9px] uppercase tracking-wider transition-colors shadow-sm border border-transparent dark:border-[#2C414C]"
                     >
                       💬 Silent SMS
                     </a>
@@ -3280,15 +3444,15 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <section className="space-y-6">
-          <h3 className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] px-1">Emergency Calls</h3>
+          <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-[0.3em] px-1">Emergency Calls</h3>
           <div className="space-y-4">
             {HELPLINES.map(h => (
-              <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="wellness-card bg-red-50/30 border-red-100/50 flex items-center justify-between hover:bg-red-50 group transition-all">
+              <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="wellness-card bg-red-50/30 dark:bg-red-950/10 border-red-100/50 dark:border-red-900/30 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/20 group transition-all">
                 <div className="space-y-1">
-                  <h4 className="font-black text-slate-900 uppercase tracking-tighter">{h.name}</h4>
-                  <p className="text-sm text-red-600 font-bold tracking-tighter">{h.number}</p>
+                  <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">{h.name}</h4>
+                  <p className="text-sm text-red-600 dark:text-red-400 font-bold tracking-tighter">{h.number}</p>
                 </div>
-                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-red-600 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-all">
+                <div className="w-12 h-12 bg-white dark:bg-[#18262C] border border-transparent dark:border-[#2C414C] rounded-xl flex items-center justify-center text-red-600 dark:text-red-400 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-all">
                   <Phone size={20} />
                 </div>
               </a>
@@ -3297,20 +3461,20 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] px-1">Instant Actions</h3>
+          <h3 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.3em] px-1">Instant Actions</h3>
           <div className="space-y-4">
-            <div className="wellness-card border-blue-100 bg-blue-50/10">
-              <h4 className="font-black text-slate-900 uppercase text-xs tracking-tight mb-3">Distress Protocol</h4>
+            <div className="wellness-card border-blue-100 dark:border-blue-900/35 bg-blue-50/10 dark:bg-blue-950/10">
+              <h4 className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-tight mb-3">Distress Protocol</h4>
               <ul className="space-y-3">
-                <li className="flex gap-3 text-sm font-medium text-slate-600">
+                <li className="flex gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
                   <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
                   Focus on your breathing. Slowly in through your nose, hold for 4, out through your mouth.
                 </li>
-                <li className="flex gap-3 text-sm font-medium text-slate-600">
+                <li className="flex gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
                   <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
                   Ground yourself. Identify 5 things you can see, 4 things you can touch, 3 things you can hear.
                 </li>
-                <li className="flex gap-3 text-sm font-medium text-slate-600">
+                <li className="flex gap-3 text-sm font-medium text-slate-600 dark:text-slate-300">
                   <span className="w-5 h-5 bg-blue-600 text-white rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
                   Call a friend or family member if you feel comfortable. Just say "I'm having a hard time."
                 </li>
@@ -3337,31 +3501,31 @@ function CrisisOverlay({ onClose }: { onClose: () => void }) {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white rounded-[40px] w-full max-w-2xl p-8 md:p-12 shadow-2xl relative"
+        className="bg-white dark:bg-[#203038] border border-slate-100 dark:border-[#2C414C] rounded-[40px] w-full max-w-2xl p-8 md:p-12 shadow-2xl relative"
       >
         <button 
           onClick={onClose}
-          className="absolute right-8 top-8 p-3 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"
+          className="absolute right-8 top-8 p-3 bg-slate-100 dark:bg-[#18262C] hover:bg-slate-200 dark:hover:bg-[#2a3c46] rounded-full text-slate-400 dark:text-slate-500 transition-colors"
         >
           <Plus className="rotate-45" size={24} />
         </button>
 
         <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-red-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-red-200">
+          <div className="w-20 h-20 bg-red-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-red-200 dark:shadow-none">
             <AlertCircle size={40} />
           </div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase mb-4">Emergency Support</h2>
-          <p className="text-slate-500 font-medium max-w-sm mx-auto">Verified Nigerian helplines available 24/7. Your wellbeing is the priority.</p>
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mb-4">Emergency Support</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm mx-auto">Verified Nigerian helplines available 24/7. Your wellbeing is the priority.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
           {HELPLINES.map(h => (
-            <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:bg-red-50 hover:border-red-100 transition-all group">
+            <a key={h.name} href={`tel:${h.number.replace(/\s/g, '')}`} className="flex items-center justify-between p-6 bg-slate-50 dark:bg-[#18262C] border border-slate-100 dark:border-[#2C414C] hover:bg-red-50 dark:hover:bg-red-950/20 hover:border-red-100 dark:hover:border-red-900/30 transition-all group rounded-3xl">
               <div>
-                <h4 className="font-black text-slate-900 uppercase text-xs tracking-tight">{h.name}</h4>
+                <h4 className="font-black text-slate-900 dark:text-white uppercase text-xs tracking-tight">{h.name}</h4>
                 <p className="text-lg font-black text-red-600 tracking-tighter mt-1">{h.number}</p>
               </div>
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-red-600 group-hover:text-white shadow-sm transition-all">
+              <div className="w-12 h-12 bg-white dark:bg-[#203038] rounded-2xl flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:bg-red-600 group-hover:text-white shadow-sm transition-all border border-transparent dark:border-[#2C414C]">
                 <Phone size={20} />
               </div>
             </a>
@@ -3370,7 +3534,7 @@ function CrisisOverlay({ onClose }: { onClose: () => void }) {
 
         <button 
           onClick={onClose}
-          className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-slate-800 transition-colors"
+          className="w-full py-5 bg-slate-900 dark:bg-[#18262C] text-white rounded-2xl font-black uppercase tracking-widest text-[12px] shadow-xl hover:bg-slate-800 dark:hover:bg-[#2a3c46] transition-colors border border-transparent dark:border-[#2C414C]"
         >
           Return to Login
         </button>
