@@ -45,24 +45,25 @@ service cloud.firestore {
     // --- Users Collection ---
     match /users/{userId} {
       function isValidUser(data) {
-        return (data.get('uid', null) == null || data.uid == request.auth.uid)
-            && (data.get('name', null) == null || (data.name is string && data.name.size() <= 100))
-            && (data.get('email', null) == null || (data.email is string && data.email.size() <= 100))
-            && (data.get('age', null) == null || (data.age is number))
-            && (data.get('username', null) == null || (data.username is string && data.username.size() <= 100))
-            && (data.get('securityQuestion', null) == null || (data.securityQuestion is string && data.securityQuestion.size() <= 200))
-            && (data.get('securityAnswer', null) == null || (data.securityAnswer is string && data.securityAnswer.size() <= 100))
-            && (data.get('reminderEnabled', null) == null || (data.reminderEnabled is bool))
-            && (data.get('reminderTime', null) == null || (data.reminderTime is string && data.reminderTime.size() <= 10))
-            && (data.get('wellnessPartnerName', null) == null || (data.wellnessPartnerName is string && data.wellnessPartnerName.size() <= 100))
-            && (data.get('wellnessPartnerEmail', null) == null || (data.wellnessPartnerEmail is string && data.wellnessPartnerEmail.size() <= 100))
-            && (data.get('locale', null) == null || (data.locale is string && data.locale.size() <= 20))
-            && (data.get('theme', null) == null || (data.theme is string && data.theme.size() <= 20))
-            && (data.get('lastState', null) == null || (data.lastState is string && data.lastState.size() <= 100))
-            && (data.get('baselineAnswers', null) == null || (data.baselineAnswers is map))
-            && (data.get('baselineScore', null) == null || (data.baselineScore is number))
-            && (data.get('createdAt', null) == null || (data.createdAt is timestamp))
-            && (data.get('updatedAt', null) == null || (data.updatedAt is timestamp));
+        return (data.get('uid', null) == null || data.get('uid', '') == request.auth.uid)
+            && (data.get('name', null) == null || (data.get('name', '') is string && data.get('name', '').size() <= 100))
+            && (data.get('email', null) == null || (data.get('email', '') is string && data.get('email', '').size() <= 100))
+            && (data.get('age', null) == null || (data.get('age', 0) is number))
+            && (data.get('dob', null) == null || (data.get('dob', '') is string && data.get('dob', '').size() <= 30))
+            && (data.get('username', null) == null || (data.get('username', '') is string && data.get('username', '').size() <= 100))
+            && (data.get('securityQuestion', null) == null || (data.get('securityQuestion', '') is string && data.get('securityQuestion', '').size() <= 200))
+            && (data.get('securityAnswer', null) == null || (data.get('securityAnswer', '') is string && data.get('securityAnswer', '').size() <= 100))
+            && (data.get('reminderEnabled', null) == null || (data.get('reminderEnabled', false) is bool))
+            && (data.get('reminderTime', null) == null || (data.get('reminderTime', '') is string && data.get('reminderTime', '').size() <= 10))
+            && (data.get('wellnessPartnerName', null) == null || (data.get('wellnessPartnerName', '') is string && data.get('wellnessPartnerName', '').size() <= 100))
+            && (data.get('wellnessPartnerEmail', null) == null || (data.get('wellnessPartnerEmail', '') is string && data.get('wellnessPartnerEmail', '').size() <= 100))
+            && (data.get('locale', null) == null || (data.get('locale', '') is string && data.get('locale', '').size() <= 20))
+            && (data.get('theme', null) == null || (data.get('theme', '') is string && data.get('theme', '').size() <= 20))
+            && (data.get('lastState', null) == null || (data.get('lastState', '') is string && data.get('lastState', '').size() <= 100))
+            && (data.get('baselineAnswers', null) == null || (data.get('baselineAnswers', {}) is map))
+            && (data.get('baselineScore', null) == null || (data.get('baselineScore', 0) is number))
+            && (data.get('createdAt', null) == null || (data.get('createdAt', request.time) is timestamp))
+            && (data.get('updatedAt', null) == null || (data.get('updatedAt', request.time) is timestamp));
       }
 
       allow read: if isOwner(userId);
@@ -72,11 +73,11 @@ service cloud.firestore {
                     && (incoming().get('createdAt', request.time) == request.time);
       allow update: if isOwner(userId)
                     && isValidUser(incoming())
-                    && (incoming().get('uid', existing().uid) == existing().uid)
-                    && (incoming().get('email', existing().email) == existing().email)
-                    && (incoming().get('createdAt', existing().get('createdAt', request.time)) == existing().get('createdAt', request.time))
+                    && (incoming().get('uid', null) == existing().get('uid', null))
+                    && (incoming().get('email', null) == existing().get('email', null))
+                    && (incoming().get('createdAt', null) == existing().get('createdAt', null))
                     && (incoming().diff(existing()).affectedKeys().hasOnly([
-                      'uid', 'email', 'name', 'age', 'lastState', 'updatedAt', 'createdAt',
+                      'uid', 'email', 'name', 'age', 'dob', 'lastState', 'updatedAt', 'createdAt',
                       'username', 'securityQuestion', 'securityAnswer',
                       'reminderEnabled', 'reminderTime',
                       'wellnessPartnerName', 'wellnessPartnerEmail',

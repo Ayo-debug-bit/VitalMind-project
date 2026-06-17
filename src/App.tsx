@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, 
@@ -24,7 +24,8 @@ import {
   ShieldAlert, 
   Sparkles, 
   Volume2,
-  Compass
+  Compass,
+  Copy
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -2827,6 +2828,22 @@ function ProfileEditView({
   const [cEmail, setCEmail] = useState('');
   const [isAddingContact, setIsAddingContact] = useState(false);
 
+  const profileLoadedRef = useRef(false);
+  useEffect(() => {
+    if (profile && !profileLoadedRef.current) {
+      profileLoadedRef.current = true;
+      setName(profile.name || '');
+      setDob(profile.dob || '');
+      if (profile.dob) {
+        setAge(calculateAge(profile.dob).toString());
+      }
+      setPartnerName(profile.wellnessPartnerName || '');
+      setPartnerEmail(profile.wellnessPartnerEmail || '');
+      setReminderEnabled(profile.reminderEnabled !== false);
+      setReminderTime(profile.reminderTime || '09:00');
+    }
+  }, [profile]);
+
   const [permissionState, setPermissionState] = useState<NotificationPermission>(
     typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default'
   );
@@ -3383,6 +3400,18 @@ function ProfileEditView({
 }
 
 function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], onBack: () => void }) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (num: string, id: string) => {
+    try {
+      navigator.clipboard.writeText(num);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 3000);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-12 pb-12 select-none">
       <section>
@@ -3396,6 +3425,9 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Crisis Support</h1>
         </div>
         <p className="text-slate-500 dark:text-slate-400 font-medium italic text-lg">You don't have to carry this alone. Please reach out to one of these verified resources now.</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 uppercase tracking-wide font-bold">
+          💡 If direct dialing is restricted on your browser or device, tap Copy Number to paste directly into your phone dialer.
+        </p>
       </section>
 
       {/* Primary User Safety Contacts List */}
@@ -3414,6 +3446,7 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
               const displayName = con.name || con.contactName || 'Safety Companion';
               const silentSmsBody = encodeURIComponent(`Hi ${displayName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from VitalMind)`);
               const cleanDialNum = con.phone.replace(/[^\d+]/g, '');
+              const isCopied = copiedId === con.id;
               return (
                 <div key={con.id} className="bg-white dark:bg-[#203038] border border-red-100 dark:border-red-900/30 rounded-2xl p-5 shadow-xs flex flex-col justify-between gap-4">
                   <div>
@@ -3438,6 +3471,14 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
                       💬 Silent SMS
                     </a>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(con.phone, con.id)}
+                    className="py-2 px-3 bg-slate-50 dark:bg-[#1C2C33] text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-100 dark:hover:bg-[#203038] font-black text-[9px] uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 border border-slate-100 dark:border-slate-800 cursor-pointer"
+                  >
+                    📋 {isCopied ? 'Copied Number!' : 'Copy Contact Number'}
+                  </button>
                 </div>
               );
             })}
@@ -3449,17 +3490,34 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
         <section className="space-y-6">
           <h3 className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-[0.3em] px-1">Emergency Calls</h3>
           <div className="space-y-4">
-            {HELPLINES.map(h => (
-              <a key={h.name} href={`tel:${h.number.replace(/[^\d+]/g, '')}`} className="wellness-card bg-red-50/30 dark:bg-red-950/10 border-red-100/50 dark:border-red-900/30 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/20 group transition-all">
-                <div className="space-y-1">
-                  <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">{h.name}</h4>
-                  <p className="text-sm text-red-600 dark:text-red-400 font-bold tracking-tighter">{h.number}</p>
+            {HELPLINES.map(h => {
+              const isCopied = copiedId === h.name;
+              return (
+                <div key={h.name} className="wellness-card bg-red-50/30 dark:bg-red-950/10 border-red-100/50 dark:border-red-900/30 flex items-center justify-between hover:bg-red-50 dark:hover:bg-red-950/20 group transition-all">
+                  <div className="space-y-1">
+                    <h4 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">{h.name}</h4>
+                    <p className="text-sm text-red-600 dark:text-red-400 font-bold tracking-tighter">{h.number}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a 
+                      href={`tel:${h.number.replace(/[^\d+]/g, '')}`} 
+                      className="w-10 h-10 bg-white dark:bg-[#18262C] border border-transparent dark:border-[#2C414C] rounded-xl flex items-center justify-center text-red-600 dark:text-red-400 shadow-sm hover:bg-red-600 hover:text-white transition-all"
+                      title="Direct Voice Call"
+                    >
+                      <Phone size={16} />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(h.number, h.name)}
+                      className="w-10 h-10 bg-white dark:bg-[#18262C] border border-transparent dark:border-[#2C414C] rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 shadow-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                      title="Copy Support Hotline"
+                    >
+                      {isCopied ? <span className="text-[8px] font-black uppercase text-emerald-600">Copied</span> : <Copy size={16} />}
+                    </button>
+                  </div>
                 </div>
-                <div className="w-12 h-12 bg-white dark:bg-[#18262C] border border-transparent dark:border-[#2C414C] rounded-xl flex items-center justify-center text-red-600 dark:text-red-400 shadow-sm group-hover:bg-red-600 group-hover:text-white transition-all">
-                  <Phone size={20} />
-                </div>
-              </a>
-            ))}
+              );
+            })}
           </div>
         </section>
 

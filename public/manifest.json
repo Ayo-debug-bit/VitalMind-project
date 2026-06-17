@@ -1,0 +1,23 @@
+{
+  "name": "VitalMind",
+  "short_name": "VitalMind",
+  "description": "Preventive Mental Wellness & Emotional Support Support Application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#131F24",
+  "theme_color": "#131F24",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

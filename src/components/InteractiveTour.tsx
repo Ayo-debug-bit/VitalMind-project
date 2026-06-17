@@ -23,7 +23,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'intro',
     targetId: 'header-wellness-state',
     title: '1. Dashboard Overview',
-    description: 'This welcome dashboard is your main station. It tracks your overall computed wellness state, daily streak achievements, and provides quick navigation.',
+    description: 'Monitor your overall calculated wellness status, track daily streaks, and access quick actions to manage your health easily.',
     arrowPosition: 'top',
     badge: 'Welcome'
   },
@@ -31,7 +31,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'mood',
     targetId: 'nav-mood',
     title: '2. Mood Tracking',
-    description: 'First, log your baseline mental state here. Track metrics like anxiety, sleep quality, and energy levels to analyze emotional and mental trends.',
+    description: 'Record how you feel daily to monitor your emotional well-being over time. Tap here to start log entries.',
     arrowPosition: 'bottom',
     badge: 'Baseline'
   },
@@ -39,7 +39,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'symptoms',
     targetId: 'nav-symptoms',
     title: '3. Symptom Logging',
-    description: 'Symptom Logging lets you track targeted physical and neurological indicators. The engine translates these into clinical risk alerts automatically.',
+    description: 'Track physical and mental symptoms to identify patterns early. Enter symptom severity lists instantly.',
     arrowPosition: 'bottom',
     badge: 'Physical State'
   },
@@ -47,7 +47,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'intelligence',
     targetId: 'tour-intelligence-center',
     title: '4. Intelligence Center',
-    description: 'Intelligence Center provides personalized wellness insights, recommendations, and health information based on your activities.',
+    description: 'Get personalized wellness insights and helpful recommendations calculated from your reported indicators.',
     arrowPosition: 'top',
     badge: 'Insights'
   },
@@ -55,15 +55,15 @@ const TOUR_STEPS: TourStep[] = [
     id: 'preventive',
     targetId: 'tour-preventive-care',
     title: '5. Preventive Care',
-    description: 'Preventive Care helps users build healthy habits and access health information for early prevention and improved well-being.',
+    description: 'Learn healthy habits and preventive practices for long-term health and wellness.',
     arrowPosition: 'top',
     badge: 'Prevention'
   },
   {
     id: 'community',
     targetId: 'tour-peer-community',
-    title: '6. Community & Peer Check-in',
-    description: 'Community / Peer Checking allows users to connect, share experiences, and receive support from peers in a safe environment.',
+    title: '6. Community / Peer Checking',
+    description: 'Connect with peers, share experiences, and receive support in a safe and anonymous ecosystem.',
     arrowPosition: 'top',
     badge: 'Peer Support'
   },
@@ -71,7 +71,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'history',
     targetId: 'nav-history',
     title: '7. Health History',
-    description: 'Wellness History catalogs your historic mood scores and logged bodily indicators, ensuring no check-in is lost over time.',
+    description: 'Browse your historical check-in records, past symptoms, and tracked habits securely at any time.',
     arrowPosition: 'bottom',
     badge: 'Check-in Logs'
   },
@@ -79,7 +79,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'reports',
     targetId: 'tour-wellness-reports',
     title: '8. Wellness Reports',
-    description: 'Under Wellness Reports, the application generates weekly and monthly highlights. You can even export complete Clinical PDF Status Reports here to share with a professional doctor!',
+    description: 'Generate clinical wellness reports and export high-contrast PDF documents to share with health professionals.',
     arrowPosition: 'top',
     badge: 'PDF Exports'
   },
@@ -87,7 +87,7 @@ const TOUR_STEPS: TourStep[] = [
     id: 'resources',
     targetId: 'nav-resources',
     title: '9. Help & Resources',
-    description: 'Preventive Help lets you browse clinically vetted help guides, offline resources, and mindfulness toolkits designed to support Nigerian young adults.',
+    description: 'Browse clinical checklists and guidelines curated by wellness experts to manage your daily habits.',
     arrowPosition: 'bottom',
     badge: 'Vetted Guides'
   },
@@ -95,23 +95,23 @@ const TOUR_STEPS: TourStep[] = [
     id: 'crisis',
     targetId: 'nav-crisis',
     title: '10. Emergency Support',
-    description: 'In deep crisis? The Emergency Support overlay gives you instant hotlines, direct distress messaging, and critical clinical intervention tools.',
+    description: 'Quickly access trusted resources and emergency contacts, including pre-saved companions and hotlines.',
     arrowPosition: 'bottom',
     badge: 'Emergency Help'
   },
   {
     id: 'profile',
     targetId: 'tour-profile-btn',
-    title: '11. Profile & Setup',
-    description: 'Manage your display name, partner email, language selections, and overall account preferences in your Profile section.',
+    title: '11. Profile & Settings',
+    description: 'Customize your full name, backup email, app triggers, and system credentials.',
     arrowPosition: 'top',
     badge: 'My Setup'
   },
   {
     id: 'accessibility_settings',
     targetId: 'tour-accessibility-replay',
-    title: '12. Easy Mode & Multilingual Settings',
-    description: 'Easily switch the entire experience across English, Yoruba, Igbo, or Hausa. Enable Easy Read mode to read insights out loud, adjust themes and replay this tour anytime!',
+    title: '12. Easy Mode & Languages',
+    description: 'Instantly toggle Easy Read voice guidance or switch your experience to Yoruba, Igbo, Hausa, or English.',
     arrowPosition: 'top',
     badge: 'Language & Accessible'
   }
@@ -301,6 +301,21 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
 
   // Determine modal card absolute positioning relative to target coordinates
   const getCardStyle = () => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      return {
+        style: {
+          position: 'fixed' as const,
+          bottom: '16px',
+          left: '16px',
+          right: '16px',
+          maxWidth: 'calc(100vw - 32px)',
+          margin: '0 auto',
+          zIndex: 10001,
+        }
+      };
+    }
+
     if (!coords) {
       return {
         style: {
@@ -312,8 +327,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
       };
     }
 
-    const isMobile = window.innerWidth < 768;
-    const cardWidth = isMobile ? 290 : 350;
+    const cardWidth = 350;
     const estimatedCardHeight = 225; // Safe approximation of the card height
     
     let top = coords.top + coords.height + 16;
