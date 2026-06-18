@@ -465,7 +465,7 @@ export function OnboardingFlow({ onComplete, initialName, onCancel }: Onboarding
                 <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
                   How to Navigate the App
                 </h3>
-                <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">Quick 1-minute visual guide to getting the most out of VitalMind.</p>
+                <p className="text-xs text-slate-400 font-medium leading-relaxed mt-1">Quick 1-minute visual guide to getting the most out of our application.</p>
               </div>
 
               {/* High Fidelity Visual Tour Columns */}
@@ -584,7 +584,7 @@ export function OnboardingFlow({ onComplete, initialName, onCancel }: Onboarding
                 <div className="flex gap-2 items-start">
                   <ShieldAlert className="text-amber-600 shrink-0 mt-0.5" size={16} />
                   <p className="font-semibold text-[11px] italic text-amber-900 dark:text-amber-400/90">
-                    <span className="text-slate-900 dark:text-white font-black not-italic">Health Disclaimer:</span> VitalMind provides self-awareness trends and automated guidelines. It does not replace medical diagnostics or clinical interventions.
+                    <span className="text-slate-900 dark:text-white font-black not-italic">Health Disclaimer:</span> This application provides self-awareness trends and automated guidelines. It does not replace medical diagnostics or clinical interventions.
                   </p>
                 </div>
               </div>

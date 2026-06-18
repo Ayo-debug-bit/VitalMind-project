@@ -1,5 +1,5 @@
 {
-  "name": "Vital Mind",
+  "name": "Preventive Healthcare & Mental Wellness",
   "description": "A preventive mental wellness application featuring rule-based mood and symptom tracking.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

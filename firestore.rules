@@ -68,14 +68,13 @@ service cloud.firestore {
 
       allow read: if isOwner(userId);
       allow create: if isOwner(userId) 
-                    && incoming().keys().hasAll(['uid', 'email'])
                     && isValidUser(incoming()) 
                     && (incoming().get('createdAt', request.time) == request.time);
       allow update: if isOwner(userId)
                     && isValidUser(incoming())
-                    && (incoming().get('uid', null) == existing().get('uid', null))
-                    && (incoming().get('email', null) == existing().get('email', null))
-                    && (incoming().get('createdAt', null) == existing().get('createdAt', null))
+                    && (existing().get('uid', null) == null || incoming().get('uid', null) == existing().get('uid', null))
+                    && (existing().get('email', null) == null || incoming().get('email', null) == existing().get('email', null))
+                    && (existing().get('createdAt', null) == null || incoming().get('createdAt', null) == existing().get('createdAt', null))
                     && (incoming().diff(existing()).affectedKeys().hasOnly([
                       'uid', 'email', 'name', 'age', 'dob', 'lastState', 'updatedAt', 'createdAt',
                       'username', 'securityQuestion', 'securityAnswer',

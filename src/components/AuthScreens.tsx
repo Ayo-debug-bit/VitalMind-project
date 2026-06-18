@@ -287,7 +287,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
           <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-2xl flex items-center justify-center mb-2 shadow-2xl shadow-blue-500/35 hover:rotate-6 transition-transform">
             <Heart className="w-7 h-7 text-white fill-white/25" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent">Vital Mind</h1>
+          <h1 className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tight uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent text-center">Preventive Healthcare & Mental Wellness</h1>
         </div>
 
         {/* Dynamic Canvas Container */}
@@ -682,7 +682,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
               >
                 <div>
                   <h2 className="text-xl font-black text-slate-900 uppercase">Create Account</h2>
-                  <p className="text-xs text-slate-400 font-medium mt-1">Become part of the Vital Mind secure system.</p>
+                  <p className="text-xs text-slate-400 font-medium mt-1">Become part of the Preventive Healthcare & Mental Wellness secure system.</p>
                 </div>
 
                 {generalError && (
@@ -1323,7 +1323,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
         </div>
 
         <p className="mt-8 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">
-          Vital Mind • Preventive Security Care
+          Preventive Healthcare and Mental Wellness Support Application
         </p>
       </div>
     </div>

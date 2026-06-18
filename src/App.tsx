@@ -286,7 +286,7 @@ function AppContent() {
 
         if ('Notification' in window && Notification.permission === 'granted') {
           try {
-            new Notification("VitalMind Medication Alert", {
+            new Notification("Preventive Healthcare Medication Alert", {
               body: bodyText,
               icon: '/favicon.ico'
             });
@@ -477,7 +477,7 @@ function AppContent() {
     }, 30000); 
 
     const triggerDeviceNotification = (bodyText: string) => {
-      const titleText = "VitalMind Check-in";
+      const titleText = "Preventive Healthcare Check-in";
       setActiveNotification({ title: titleText, body: bodyText });
 
       if ('Notification' in window && Notification.permission === 'granted') {
@@ -887,10 +887,10 @@ function AppContent() {
       }`}>
         <div className={`p-8 border-b ${theme === 'dark' ? 'border-[#2C414C]' : 'border-[#CCFBF1]/40'}`}>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/10 hover:rotate-6 transition-transform">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/10 hover:rotate-6 transition-transform shrink-0">
               <Heart className="w-5 h-5 text-white fill-white/20" />
             </div>
-            <h1 className="font-black text-xl tracking-tighter uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-emerald-400">Vital Mind</h1>
+            <h1 className="font-extrabold text-[11px] tracking-normal uppercase bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-emerald-400 max-w-[170px] leading-tight">Preventive Healthcare & Mental Wellness</h1>
           </div>
         </div>
         
@@ -1048,7 +1048,7 @@ function AppContent() {
             ? 'bg-[#131F24]/85 text-slate-400 border-[#2C414C]' 
             : 'bg-white/85 text-slate-400 border-[#CCFBF1]/40'
         }`}>
-          <div>Vital Mind System • v1.1.0</div>
+          <div>Preventive Healthcare & Mental Wellness Support Application • v1.1.0</div>
           <div className="flex gap-6">
             <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Rule-Engine Active</span>
             <span className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Secure Encryption</span>
@@ -1069,7 +1069,7 @@ function AppContent() {
               <div className="flex gap-3">
                 <span className="text-2xl pt-0.5 shrink-0">🔔</span>
                 <div className="space-y-1">
-                  <h4 className="font-black text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400">VitalMind Alert</h4>
+                  <h4 className="font-black text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400">Healthcare Alert</h4>
                   <p className="text-xs font-bold text-slate-800 dark:text-[#E3ECF0] leading-relaxed">{activeNotification.body}</p>
                 </div>
               </div>
@@ -1390,6 +1390,7 @@ function DashboardView({
             </div>
           </div>
           <button 
+            id="dashboard-crisis-btn"
             onClick={() => setView('crisis')}
             className="px-6 py-2 bg-red-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-500/15 dark:shadow-none whitespace-nowrap"
           >
@@ -1407,7 +1408,7 @@ function DashboardView({
             </div>
             <div>
               <h4 className="font-black text-slate-800 dark:text-white uppercase text-[10px] tracking-widest flex items-center gap-2">
-                New to VitalMind? Take the 1-Minute Visual Tour
+                New? Take the 1-Minute Hands-on Practice Tour
               </h4>
               <p className="text-xs text-slate-500 dark:text-[#a8b8c0] font-medium leading-relaxed mt-0.5">
                 Learn how to locate trackers, understand warning telemetry, download shared doctor reports & navigate seamlessly.
@@ -1486,7 +1487,7 @@ function DashboardView({
               </h3>
               <button 
                 onClick={() => setModalInfo({ 
-                  title: "Vital Mind Intelligence", 
+                  title: "Healthcare Wellness Intelligence", 
                   content: "Our rule-based system analyzes your emotional and physical logs over 14-day windows to detect trends and suggest medically-informed preventive actions."
                 })}
                 className="text-slate-300 dark:text-slate-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
@@ -1885,6 +1886,7 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
         {getFilteredMoods().map((m) => (
           <button
             key={m.type}
+            id={`mood-btn-${m.type}`}
             type="button"
             onClick={() => toggleMood(m.type)}
             className={`flex flex-col items-center justify-center p-6 rounded-[28px] transition-all border text-center cursor-pointer ${
@@ -1968,6 +1970,7 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
       </section>
 
       <button
+        id="mood-submit-btn"
         disabled={selectedMoods.length === 0 || saving}
         onClick={handleSave}
         className="btn-primary w-full py-5 text-[12px] uppercase tracking-widest shadow-xl cursor-pointer"
@@ -2059,6 +2062,7 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
     return (
       <div key={s} className="space-y-2">
         <button
+          id={`symptom-btn-${s.replace(/\s+/g, '')}`}
           type="button"
           onClick={() => toggle(s)}
           className={`w-full p-5 bg-white dark:bg-[#203038] border rounded-2xl flex justify-between items-center transition-all min-h-[56px] text-left active:scale-[0.99] cursor-pointer ${
@@ -2137,6 +2141,7 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
       </div>
 
       <button
+        id="symptom-submit-btn"
         disabled={saving}
         onClick={handleSave}
         className="btn-primary w-full py-5 text-[12px] uppercase tracking-widest shadow-xl shadow-blue-100 h-16"
@@ -2390,9 +2395,9 @@ function HistoryView({
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
     doc.setTextColor(148, 163, 184); // slate-400
-    doc.text("Confidential Clinical Document • Vital Mind Mental Wellness Support System", 20, 287);
+    doc.text("Confidential Clinical Document • Preventive Healthcare and Mental Wellness Support Application", 20, 287);
     
-    doc.save(`vitalmind_report_${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`preventive_healthcare_report_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   const getChartData = () => {
@@ -2861,7 +2866,7 @@ function ProfileEditView({
 
     if ('Notification' in window && Notification.permission === 'granted') {
       try {
-        new Notification("VitalMind Check-in", {
+        new Notification("Healthcare Check-in", {
           body: `How are you feeling today, ${name || 'friend'}? Tap to log your mood.`,
           icon: '/favicon.ico'
         });
@@ -2871,7 +2876,7 @@ function ProfileEditView({
     } else {
       const event = new CustomEvent('vitalmind_test_notification', {
         detail: {
-          title: "VitalMind Check-in",
+          title: "Healthcare Check-in",
           body: `How are you feeling today, ${name || 'friend'}? Tap to log your mood.`
         }
       });
@@ -3444,7 +3449,7 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {safetyContacts.map(con => {
               const displayName = con.name || con.contactName || 'Safety Companion';
-              const silentSmsBody = encodeURIComponent(`Hi ${displayName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from VitalMind)`);
+              const silentSmsBody = encodeURIComponent(`Hi ${displayName}, this is a silent check-in. I am feeling distressed right now & would love a gentle hand or voice. (Sent from Preventive Healthcare and Mental Wellness Support Application)`);
               const cleanDialNum = con.phone.replace(/[^\d+]/g, '');
               const isCopied = copiedId === con.id;
               return (

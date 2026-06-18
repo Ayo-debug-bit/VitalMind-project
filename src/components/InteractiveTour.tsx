@@ -16,104 +16,127 @@ interface TourStep {
   description: string;
   arrowPosition: 'top' | 'bottom' | 'left' | 'right';
   badge: string;
+  isInteractive?: boolean;
 }
 
 const TOUR_STEPS: TourStep[] = [
   {
-    id: 'intro',
+    id: 'welcome',
     targetId: 'header-wellness-state',
-    title: '1. Dashboard Overview',
-    description: 'Monitor your overall calculated wellness status, track daily streaks, and access quick actions to manage your health easily.',
+    title: "1. Welcome! Let's Practice",
+    description: "Welcome to your Preventive Healthcare & Mental Wellness assistance workspace. Let's do a quick, hands-on practice walkthrough of how everything connects to build your mental model!",
     arrowPosition: 'top',
-    badge: 'Welcome'
+    badge: 'Onboarding System'
   },
   {
-    id: 'mood',
+    id: 'wellness_index',
+    targetId: 'header-wellness-state',
+    title: '2. Your Wellness Indicator',
+    description: "This is your calculated overall Wellness Score. When you log your mood and physical symptoms regularly, our clinically vetted rules evaluate your status to guide your clinical & preventive actions!",
+    arrowPosition: 'top',
+    badge: 'State Score'
+  },
+  {
+    id: 'mood_tab',
     targetId: 'nav-mood',
-    title: '2. Mood Tracking',
-    description: 'Record how you feel daily to monitor your emotional well-being over time. Tap here to start log entries.',
+    title: '3. Tap to track your Mood',
+    description: 'Let\'s try it! Tap the "Mood" button highlighted below in the navigation bar to open the Mood Tracker dashboard.',
     arrowPosition: 'bottom',
-    badge: 'Baseline'
+    badge: 'Hands-on Practice',
+    isInteractive: true
   },
   {
-    id: 'symptoms',
+    id: 'choose_mood',
+    targetId: 'mood-btn-Calm',
+    title: '4. Choose Mood "Calm"',
+    description: 'Wonderful! Now select a mood to register. Click the "Calm" emoji button highlighted in the spotlight catalog.',
+    arrowPosition: 'bottom',
+    badge: 'Choose Mood',
+    isInteractive: true
+  },
+  {
+    id: 'save_mood',
+    targetId: 'mood-submit-btn',
+    title: '5. Submit Mood Entry',
+    description: 'Look at that! Once selected, click the green "Confirm Mood Entry" button to save your mood and return back.',
+    arrowPosition: 'top',
+    badge: 'Save Entry',
+    isInteractive: true
+  },
+  {
+    id: 'symptoms_tab',
     targetId: 'nav-symptoms',
-    title: '3. Symptom Logging',
-    description: 'Track physical and mental symptoms to identify patterns early. Enter symptom severity lists instantly.',
+    title: '6. Open Symptom Logger',
+    description: 'Excellent mood check-in! Next, let\'s learn how to log a symptom. Tap the "Symptoms" tab highlighted below.',
     arrowPosition: 'bottom',
-    badge: 'Physical State'
+    badge: 'Symptom Entry',
+    isInteractive: true
   },
   {
-    id: 'intelligence',
-    targetId: 'tour-intelligence-center',
-    title: '4. Intelligence Center',
-    description: 'Get personalized wellness insights and helpful recommendations calculated from your reported indicators.',
+    id: 'choose_symptom',
+    targetId: 'symptom-btn-Fatigue',
+    title: '7. Log "Fatigue" Symptom',
+    description: 'Well done! Select markers present in your current state to log them. Click the "Fatigue" card highlighted below.',
     arrowPosition: 'top',
-    badge: 'Insights'
+    badge: 'Hands-on',
+    isInteractive: true
   },
   {
-    id: 'preventive',
+    id: 'save_symptoms',
+    targetId: 'symptom-submit-btn',
+    title: '8. Submit Symptom Log',
+    description: 'Great! Now save your reports securely. Click the blue "Submit Symptom Log" button to record this and return.',
+    arrowPosition: 'top',
+    badge: 'Save Symptoms',
+    isInteractive: true
+  },
+  {
+    id: 'preventive_care',
     targetId: 'tour-preventive-care',
-    title: '5. Preventive Care',
-    description: 'Learn healthy habits and preventive practices for long-term health and wellness.',
+    title: '9. Preventive Care Vitals',
+    description: 'Amazing! Now look at the Preventive Care recommendations. Vetted clinical guidelines for age & sex update dynamically to ensure you stay healthy.',
     arrowPosition: 'top',
-    badge: 'Prevention'
+    badge: 'Preventive Actions'
   },
   {
-    id: 'community',
+    id: 'intelligence_center',
+    targetId: 'tour-intelligence-center',
+    title: '10. Intelligence Insights',
+    description: 'Here is your rule-based Intelligence Center. It computes warning markers over 14-day rolling windows to suggest medical actions, so check it regularly!',
+    arrowPosition: 'top',
+    badge: 'Smart Center'
+  },
+  {
+    id: 'peer_community',
     targetId: 'tour-peer-community',
-    title: '6. Community / Peer Checking',
-    description: 'Connect with peers, share experiences, and receive support in a safe and anonymous ecosystem.',
+    title: '11. Safe Peer Space',
+    description: 'Connect with other peers anonymously, vote on wellness topics, and build your supportive medical circle securely!',
     arrowPosition: 'top',
-    badge: 'Peer Support'
+    badge: 'Peer Network'
   },
   {
-    id: 'history',
-    targetId: 'nav-history',
-    title: '7. Health History',
-    description: 'Browse your historical check-in records, past symptoms, and tracked habits securely at any time.',
-    arrowPosition: 'bottom',
-    badge: 'Check-in Logs'
-  },
-  {
-    id: 'reports',
-    targetId: 'tour-wellness-reports',
-    title: '8. Wellness Reports',
-    description: 'Generate clinical wellness reports and export high-contrast PDF documents to share with health professionals.',
-    arrowPosition: 'top',
-    badge: 'PDF Exports'
-  },
-  {
-    id: 'resources',
-    targetId: 'nav-resources',
-    title: '9. Help & Resources',
-    description: 'Browse clinical checklists and guidelines curated by wellness experts to manage your daily habits.',
-    arrowPosition: 'bottom',
-    badge: 'Vetted Guides'
-  },
-  {
-    id: 'crisis',
+    id: 'emergency_support',
     targetId: 'nav-crisis',
-    title: '10. Emergency Support',
-    description: 'Quickly access trusted resources and emergency contacts, including pre-saved companions and hotlines.',
+    title: '12. Crisis & Emergency Support',
+    description: 'Your safety is absolutely critical. For any immediate assistance or suicidal/self-harm warnings, emergency advisors and pre-saved safety circle dispatchers are always one-tap away here.',
     arrowPosition: 'bottom',
     badge: 'Emergency Help'
   },
   {
-    id: 'profile',
-    targetId: 'tour-profile-btn',
-    title: '11. Profile & Settings',
-    description: 'Customize your full name, backup email, app triggers, and system credentials.',
-    arrowPosition: 'top',
-    badge: 'My Setup'
+    id: 'reports',
+    targetId: 'tour-wellness-reports',
+    title: '13. Clinical Wellness Reports',
+    description: 'Need to consult with a doctor? Click the "History" section anytime to download high-contrast formatted PDF reports to share with clinical practitioners.',
+    arrowPosition: 'bottom',
+    badge: 'PDF Exports'
   },
   {
-    id: 'accessibility_settings',
-    targetId: 'tour-accessibility-replay',
-    title: '12. Easy Mode & Languages',
-    description: 'Instantly toggle Easy Read voice guidance or switch your experience to Yoruba, Igbo, Hausa, or English.',
+    id: 'profile_instructions',
+    targetId: 'tour-profile-btn',
+    title: '14. Easy Mode & Translations',
+    description: 'Lastly, click your Profile anytime to switch to Easy Mode (adding full reading voice prompts) or change between Hausa, Igbo, Yoruba, or English translations!',
     arrowPosition: 'top',
-    badge: 'Language & Accessible'
+    badge: 'Done!'
   }
 ];
 
@@ -127,35 +150,40 @@ interface InteractiveTourProps {
 export function InteractiveTour({ onClose, theme = 'light', currentView, setCurrentView }: InteractiveTourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [coords, setCoords] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const lastScrollIndexRef = useRef<number>(-1);
 
   const currentStep = TOUR_STEPS[currentStepIndex];
+
+  // Save completion status to localStorage
+  const handleTourFinish = () => {
+    localStorage.setItem('preventive_healthcare_tour_completed', 'true');
+    onClose();
+  };
 
   // Automatically switch view based on current step
   useEffect(() => {
     if (!currentStep) return;
     
-    // Map step to the corresponding view
     let targetView: 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile' | 'crisis' | null = null;
+    
     if (
-      currentStep.id === 'intro' || 
-      currentStep.id === 'community' || 
-      currentStep.id === 'intelligence' || 
-      currentStep.id === 'preventive'
+      currentStep.id === 'welcome' || 
+      currentStep.id === 'wellness_index' ||
+      currentStep.id === 'mood_tab' ||
+      currentStep.id === 'preventive_care' ||
+      currentStep.id === 'intelligence_center' ||
+      currentStep.id === 'peer_community'
     ) {
       targetView = 'dashboard';
-    } else if (currentStep.id === 'mood') {
+    } else if (currentStep.id === 'choose_mood' || currentStep.id === 'save_mood') {
       targetView = 'mood';
-    } else if (currentStep.id === 'symptoms') {
+    } else if (currentStep.id === 'symptoms_tab') {
+      // Keep view selection or prepare
+    } else if (currentStep.id === 'choose_symptom' || currentStep.id === 'save_symptoms') {
       targetView = 'symptoms';
-    } else if (currentStep.id === 'history' || currentStep.id === 'reports') {
+    } else if (currentStep.id === 'reports') {
       targetView = 'history';
-    } else if (currentStep.id === 'resources') {
-      targetView = 'resources';
-    } else if (currentStep.id === 'crisis') {
-      targetView = 'crisis';
-    } else if (currentStep.id === 'profile' || currentStep.id === 'accessibility_settings') {
+    } else if (currentStep.id === 'profile_instructions') {
       targetView = 'profile';
     }
     
@@ -164,17 +192,27 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     }
   }, [currentStepIndex, currentStep, currentView, setCurrentView]);
 
-  // Recalculate target positions using requestAnimationFrame for continuous, ultra-smooth tracking during transitions/scrolls
+  // Continuously recalculate spot coordinates using requestAnimationFrame
   useEffect(() => {
     let active = true;
     let animationFrameId: number;
     const startTime = Date.now();
-    const trackingDuration = 2000; // Track continuously for 2.0 seconds after step/view change to cover all animations & smooth scrolling
+    const trackingDuration = 2000;
     
     const findElement = (): HTMLElement | null => {
       if (!currentStep) return null;
       let element: HTMLElement | null = null;
-      if (currentStep.targetId.startsWith('nav-')) {
+
+      // Special fallback matching for emergency button (desktop vs mobile)
+      if (currentStep.targetId === 'nav-crisis') {
+        const desktopCrisis = document.getElementById('nav-crisis');
+        const isDesktopVisible = desktopCrisis && desktopCrisis.getBoundingClientRect().width > 0;
+        if (isDesktopVisible) {
+          element = desktopCrisis;
+        } else {
+          element = document.getElementById('dashboard-crisis-btn');
+        }
+      } else if (currentStep.targetId.startsWith('nav-')) {
         const candidates = document.querySelectorAll(`[id="${currentStep.targetId}"]`);
         for (let i = 0; i < candidates.length; i++) {
           const el = candidates[i] as HTMLElement;
@@ -198,7 +236,6 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
       
       const element = findElement();
       if (element) {
-        // Auto-scroll once per step to guarantee visibility for off-screen/below fold features
         if (lastScrollIndexRef.current !== currentStepIndex) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
           lastScrollIndexRef.current = currentStepIndex;
@@ -207,7 +244,6 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
         const rect = element.getBoundingClientRect();
         
         setCoords(prevCoords => {
-          // Only update state if coords have actually changed to avoid unnecessary re-renders
           if (
             prevCoords &&
             Math.abs(prevCoords.top - rect.top) < 0.5 &&
@@ -225,19 +261,14 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
           };
         });
       } else {
-        // If element is not found yet, we set coordinates to null so we don't display a stale spotlight elsewhere
-        // But only do so if we are fresh in this step (to avoid flickering)
         if (Date.now() - startTime > 300) {
-          // If after 300ms (exit transitions) the element is still missing, clear the highlight
           setCoords(null);
         }
       }
 
-      // Continue tracking frame-by-frame during the active transition window
       if (Date.now() - startTime < trackingDuration) {
         animationFrameId = requestAnimationFrame(track);
       } else {
-        // After transition settles, do a low-frequency keep-alive check just in case layout shifts
         setTimeout(() => {
           if (active) {
             track();
@@ -248,7 +279,6 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
 
     track();
 
-    // Event listener updates coordinates continuously on scroll or resize
     const updateOnEvent = () => {
       const element = findElement();
       if (element) {
@@ -265,7 +295,6 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     window.addEventListener('resize', updateOnEvent, { passive: true });
     window.addEventListener('scroll', updateOnEvent, { passive: true });
 
-    // Watch for DOM changes to ensure position updates if tabs render deferred
     let observer: ResizeObserver | null = null;
     if (typeof ResizeObserver !== 'undefined' && document.body) {
       observer = new ResizeObserver(() => {
@@ -285,11 +314,47 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     };
   }, [currentStepIndex, currentView]);
 
+  // Click on direct targeted elements automatically advancement trigger
+  useEffect(() => {
+    if (!currentStep) return;
+
+    // Find custom dynamic target
+    const getTargetElement = (): HTMLElement | null => {
+      if (currentStep.targetId === 'nav-crisis') {
+        const desktopCrisis = document.getElementById('nav-crisis');
+        const isDesktopVisible = desktopCrisis && desktopCrisis.getBoundingClientRect().width > 0;
+        return isDesktopVisible ? desktopCrisis : document.getElementById('dashboard-crisis-btn');
+      }
+      return document.getElementById(currentStep.targetId);
+    };
+
+    const element = getTargetElement();
+    if (!element) return;
+
+    const handleTargetClick = () => {
+      setTimeout(() => {
+        if (currentStep.isInteractive) {
+          setCurrentStepIndex(index => {
+            if (index < TOUR_STEPS.length - 1) {
+              return index + 1;
+            }
+            return index;
+          });
+        }
+      }, 300);
+    };
+
+    element.addEventListener('click', handleTargetClick);
+    return () => {
+      element.removeEventListener('click', handleTargetClick);
+    };
+  }, [currentStepIndex, currentStep, currentView]);
+
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
-      onClose();
+      handleTourFinish();
     }
   };
 
@@ -299,14 +364,22 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     }
   };
 
-  // Determine modal card absolute positioning relative to target coordinates
+  // Build responsive, non-overlapping card positions
   const getCardStyle = () => {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
+      let positionAtTop = false;
+      if (coords) {
+        const targetY = coords.top + (coords.height / 2);
+        if (targetY > window.innerHeight / 2) {
+          positionAtTop = true;
+        }
+      }
       return {
         style: {
           position: 'fixed' as const,
-          bottom: '16px',
+          top: positionAtTop ? '16px' : 'auto',
+          bottom: positionAtTop ? 'auto' : '16px',
           left: '16px',
           right: '16px',
           maxWidth: 'calc(100vw - 32px)',
@@ -328,38 +401,31 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     }
 
     const cardWidth = 350;
-    const estimatedCardHeight = 225; // Safe approximation of the card height
+    const estimatedCardHeight = 225;
     
     let top = coords.top + coords.height + 16;
     let left = coords.left + (coords.width / 2) - (cardWidth / 2);
 
-    // Adjustments to lock within viewport boundaries
     if (left < 16) left = 16;
     if (left + cardWidth > window.innerWidth - 16) {
       left = window.innerWidth - cardWidth - 16;
     }
 
-    // Smart placement decision: place above or below the target based on viewport space
     const spaceBelow = window.innerHeight - (coords.top + coords.height);
     const spaceAbove = coords.top;
 
     if (currentStep.arrowPosition === 'bottom' || (spaceBelow < estimatedCardHeight + 20 && spaceAbove > spaceBelow)) {
-      // Placed above the target
       top = coords.top - estimatedCardHeight - 16;
       if (top < 16) {
-        // Fallback to below if above doesn't fit either
         top = coords.top + coords.height + 16;
       }
     } else {
-      // Placed below the target
       top = coords.top + coords.height + 16;
       if (top + estimatedCardHeight > window.innerHeight - 16) {
-        // Fallback to above if below overflows
         top = coords.top - estimatedCardHeight - 16;
       }
     }
 
-    // Final clamps to ensure the guide card never overflows off-screen
     if (top < 16) top = 16;
     if (top + estimatedCardHeight > window.innerHeight - 16) {
       top = window.innerHeight - estimatedCardHeight - 16;
@@ -377,33 +443,42 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
 
   const cardPosition = getCardStyle();
 
+  const getClipPath = () => {
+    if (!coords) return 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%)';
+    const padding = 6;
+    const cl = Math.max(0, coords.left - padding);
+    const ct = Math.max(0, coords.top - padding);
+    const cw = coords.width + (padding * 2);
+    const ch = coords.height + (padding * 2);
+    
+    return `polygon(
+      0% 0%, 
+      0% 100%, 
+      ${cl}px 100%, 
+      ${cl}px ${ct}px, 
+      ${cl + cw}px ${ct}px, 
+      ${cl + cw}px ${ct + ch}px, 
+      ${cl}px ${ct + ch}px, 
+      ${cl}px 100%, 
+      100% 100%, 
+      100% 0%
+    )`;
+  };
+
   return (
     <div id="interactive-tour-overlay" className="fixed inset-0 z-[9999] pointer-events-none select-none">
       
-      {/* Background Mask spotlight highlights - stays active continuously to prevent flickering or unmounting flashes */}
+      {/* Background Mask */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="absolute inset-0 bg-black/50 dark:bg-black/75 pointer-events-auto backdrop-blur-[1px]"
-        style={{
-          clipPath: coords ? `polygon(
-            0% 0%, 
-            0% 100%, 
-            ${coords.left}px 100%, 
-            ${coords.left}px ${coords.top}px, 
-            ${coords.left + coords.width}px ${coords.top}px, 
-            ${coords.left + coords.width}px ${coords.top + coords.height}px, 
-            ${coords.left}px ${coords.top + coords.height}px, 
-            ${coords.left}px 100%, 
-            100% 100%, 
-            100% 0%
-          )` : 'polygon(0% 0%, 0% 100%, 0% 100%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 100%, 100% 100%, 100% 0%)'
-        }}
+        className="absolute inset-0 bg-black/60 dark:bg-black/80 pointer-events-auto backdrop-blur-[1.5px]"
+        style={{ clipPath: getClipPath() }}
       />
 
-      {/* Target Focus Ring Overlay with Subtle Pulse Focus Effect */}
+      {/* Target Focus Ring Overlay */}
       <AnimatePresence mode="wait">
         {coords && (
           <motion.div
@@ -431,39 +506,36 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
         {coords && (
           <motion.div
             key={`cursor-step-${currentStepIndex}`}
-            initial={{ 
-              opacity: 0, 
-              x: coords.left + (coords.width / 2) + 20, 
-              y: coords.top + (coords.height / 2) + 20 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            style={{ 
+              position: 'absolute',
+              top: `${coords.top + (coords.height / 2) - 12}px`,
+              left: `${coords.left + (coords.width / 2) - 12}px`,
             }}
-            animate={{ 
-              opacity: 1, 
-              x: coords.left + (coords.width / 2) - 8,
-              y: coords.top + (coords.height / 2) - 8
-            }}
-            transition={{ type: 'spring', stiffness: 100, damping: 15 }}
-            className="absolute z-[10000] pointer-events-none"
+            className="z-[10000] pointer-events-none"
           >
-            {/* The clicking cursor visual */}
             <div className="relative">
               <span className="absolute inline-flex h-8 w-8 rounded-full bg-emerald-500/40 animate-ping" />
               <div className="absolute inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white shadow-lg" />
               
-              {/* Hand Finger Pointer Graphic */}
               <motion.div 
                 animate={{ y: [0, -6, 0] }}
                 transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className="absolute top-3 left-3 bg-white dark:bg-[#18262C] border border-slate-200 dark:border-slate-800 p-1.5 rounded-xl shadow-xl flex items-center gap-1.5 shrink-0"
+                className="absolute top-3 left-3 bg-white dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] p-1.5 rounded-xl shadow-xl flex items-center gap-1.5 shrink-0"
               >
                 <span className="text-lg">👆</span>
-                <span className="text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider whitespace-nowrap">Point Here</span>
+                <span className="text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider whitespace-nowrap">
+                  {currentStep.isInteractive ? 'Log Here' : 'Point Here'}
+                </span>
               </motion.div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Walkthrough Guide Floating Card */}
+      {/* Guide Floating Card */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-text">
         <div className="relative w-full h-full">
           <AnimatePresence mode="wait">
@@ -499,9 +571,14 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
                 <p className="text-xs text-slate-500 dark:text-[#a8b8c0] font-medium leading-relaxed">
                   {currentStep.description}
                 </p>
+                {currentStep.isInteractive && (
+                  <div className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 p-1.5 rounded-lg text-amber-800 dark:text-amber-400 font-bold text-[9px] uppercase tracking-wider mt-1.5">
+                    <Sparkles size={10} className="animate-pulse" /> Practice Action Required!
+                  </div>
+                )}
               </div>
 
-              {/* Progress Steps Indicator */}
+              {/* Progress Panel */}
               <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-[#2C414C]">
                 <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   Step {currentStepIndex + 1} of {TOUR_STEPS.length}

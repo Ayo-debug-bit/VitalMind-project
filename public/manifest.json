@@ -1,7 +1,7 @@
 {
-  "name": "VitalMind",
-  "short_name": "VitalMind",
-  "description": "Preventive Mental Wellness & Emotional Support Support Application",
+  "name": "Preventive Healthcare and Mental Wellness Support Application",
+  "short_name": "Preventive Healthcare & Mental Wellness",
+  "description": "Preventive Healthcare and Mental Wellness Support Application",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#131F24",
