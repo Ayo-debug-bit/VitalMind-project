@@ -158,9 +158,10 @@ interface InteractiveTourProps {
   theme?: 'light' | 'dark';
   currentView: 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile' | 'crisis';
   setCurrentView: (view: 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile' | 'crisis') => void;
+  isPopupOpen?: boolean;
 }
 
-export function InteractiveTour({ onClose, theme = 'light', currentView, setCurrentView }: InteractiveTourProps) {
+export function InteractiveTour({ onClose, theme = 'light', currentView, setCurrentView, isPopupOpen = false }: InteractiveTourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [coords, setCoords] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -609,60 +610,64 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     }
   };
 
+  const isOverlayBlocked = currentStep.type !== 'action' && !isPopupOpen;
+
   return (
     <div id="interactive-tour-overlay" className="fixed inset-0 z-[9999] pointer-events-none select-none">
       
       {/* 4-Panel Moderate Mask allows Spatial Awareness & keeps viewport visible */}
-      {coords ? (
-        <>
-          {/* Top light sheet */}
-          <div 
-            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
-            style={{
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: `${Math.max(0, coords.top - PADDING)}px`,
-            }}
-          />
-          {/* Bottom light sheet */}
-          <div 
-            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
-            style={{
-              top: `${coords.top + coords.height + PADDING}px`,
-              left: 0,
-              width: '100vw',
-              bottom: 0,
-            }}
-          />
-          {/* Left light sheet */}
-          <div 
-            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
-            style={{
-              top: `${Math.max(0, coords.top - PADDING)}px`,
-              left: 0,
-              width: `${Math.max(0, coords.left - PADDING)}px`,
-              height: `${coords.height + 2 * PADDING}px`,
-            }}
-          />
-          {/* Right light sheet */}
-          <div 
-            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
-            style={{
-              top: `${Math.max(0, coords.top - PADDING)}px`,
-              left: `${coords.left + coords.width + PADDING}px`,
-              right: 0,
-              height: `${coords.height + 2 * PADDING}px`,
-            }}
-          />
-        </>
-      ) : (
-        <div className="fixed inset-0 bg-slate-900/12 dark:bg-black/35 z-[9990] pointer-events-auto" />
+      {!isPopupOpen && (
+        coords ? (
+          <>
+            {/* Top light sheet */}
+            <div 
+              className={`fixed bg-slate-900/10 dark:bg-black/20 z-[9990] transition-all duration-150 ${isOverlayBlocked ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              style={{
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: `${Math.max(0, coords.top - PADDING)}px`,
+              }}
+            />
+            {/* Bottom light sheet */}
+            <div 
+              className={`fixed bg-slate-900/10 dark:bg-black/20 z-[9990] transition-all duration-150 ${isOverlayBlocked ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              style={{
+                top: `${coords.top + coords.height + PADDING}px`,
+                left: 0,
+                width: '100vw',
+                bottom: 0,
+              }}
+            />
+            {/* Left light sheet */}
+            <div 
+              className={`fixed bg-slate-900/10 dark:bg-black/20 z-[9990] transition-all duration-150 ${isOverlayBlocked ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              style={{
+                top: `${Math.max(0, coords.top - PADDING)}px`,
+                left: 0,
+                width: `${Math.max(0, coords.left - PADDING)}px`,
+                height: `${coords.height + 2 * PADDING}px`,
+              }}
+            />
+            {/* Right light sheet */}
+            <div 
+              className={`fixed bg-slate-900/10 dark:bg-black/20 z-[9990] transition-all duration-150 ${isOverlayBlocked ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              style={{
+                top: `${Math.max(0, coords.top - PADDING)}px`,
+                left: `${coords.left + coords.width + PADDING}px`,
+                right: 0,
+                height: `${coords.height + 2 * PADDING}px`,
+              }}
+            />
+          </>
+        ) : (
+          <div className={`fixed inset-0 bg-slate-900/12 dark:bg-black/35 z-[9990] ${isOverlayBlocked ? 'pointer-events-auto' : 'pointer-events-none'}`} />
+        )
       )}
 
       {/* Target focus glowing indicators */}
       <AnimatePresence>
-        {coords && (
+        {!isPopupOpen && coords && (
           <motion.div
             key="focus-ring"
             initial={{ opacity: 0, scale: 1.05 }}
@@ -688,7 +693,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
 
       {/* Adaptive hand pointer cursor with corresponding emoji orientation (👆 vs 👇) */}
       <AnimatePresence mode="wait">
-        {cursorProps && (
+        {!isPopupOpen && cursorProps && (
           <motion.div
             key={`cursor-step-${currentStepIndex}`}
             initial={{ opacity: 0, scale: 0.8 }}
@@ -723,7 +728,50 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-text">
         <div className="relative w-full h-full">
           <AnimatePresence mode="wait">
-            {isCollapsed ? (
+            {isPopupOpen ? (
+              <motion.div
+                key="tour-paused-pill"
+                initial={{ opacity: 0, y: 15, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.96 }}
+                transition={{ duration: 0.18 }}
+                style={{
+                  position: 'fixed',
+                  zIndex: 10001,
+                }}
+                className={`fixed left-1/2 -translate-x-1/2 w-[calc(100%-32px)] sm:w-[480px] pointer-events-auto bottom-6 bg-[#FAF0E6]/95 dark:bg-[#2C2421]/95 border-2 border-amber-500/80 p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 text-left backdrop-blur-md`}
+              >
+                {/* Left side text segment */}
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="bg-amber-500 text-white p-1.5 rounded-lg shrink-0 flex items-center justify-center animate-pulse">
+                    <Sparkles size={14} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[8px] font-black uppercase text-amber-600 dark:text-amber-400 tracking-wider">
+                        Walkthrough Paused
+                      </span>
+                    </div>
+                    <h5 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate mt-0.5">
+                      Feedback Required
+                    </h5>
+                    <p className="text-[10px] text-slate-500 dark:text-[#a8b8c0] font-bold leading-tight truncate">
+                      An active alert or medical guideline tip is shown. Close it to resume.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Skip option */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={onClose}
+                    className="p-1 px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-[8px] font-black uppercase tracking-wider rounded-lg border border-slate-200/50 dark:border-slate-800 cursor-pointer transition-colors"
+                  >
+                    Skip
+                  </button>
+                </div>
+              </motion.div>
+            ) : isCollapsed ? (
               <motion.div
                 key={`tour-pill-${currentStepIndex}`}
                 initial={{ opacity: 0, y: isTargetAtTop ? 15 : -15, scale: 0.96 }}

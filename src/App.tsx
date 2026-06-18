@@ -1279,6 +1279,7 @@ function AppContent() {
           theme={theme}
           currentView={currentView}
           setCurrentView={setCurrentView}
+          isPopupOpen={!!modalInfo || !!activeSupportTip || !!activeNotification || showLogoutConfirm}
         />
       )}
 
