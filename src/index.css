@@ -71,3 +71,17 @@
 .dark ::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+
+/* iOS Safe Areas & PWA Spacing Enhancements */
+.pb-safe {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Prevent auto-zooming on iOS inputs by ensuring standard font size is at least 16px */
+input:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl),
+select:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl),
+textarea:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl),
+.input-field:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl) {
+  font-size: 16px !important;
+}
+
