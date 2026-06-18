@@ -181,6 +181,51 @@ function AppContent() {
   const [isOffline, setIsOffline] = useState<boolean>(typeof window !== 'undefined' ? !window.navigator.onLine : false);
   const [activeSupportTip, setActiveSupportTip] = useState<string | null>(null);
 
+  // PWA installation helper states
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showIosInstallGuide, setShowIosInstallGuide] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Detect if running on mobile iOS (iPhone, iPad, iPod) and not already standalone
+    const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+    
+    if (isIos && !isStandalone) {
+      const dismissed = localStorage.getItem('dismissed_ios_install_prompt_temp');
+      if (!dismissed) {
+        setShowIosInstallGuide(true);
+      }
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleAndroidInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try {
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`PWA user selection choice outcome: ${outcome}`);
+    } catch (err) {
+      console.error("PWA Prompt choice error:", err);
+    }
+    setDeferredPrompt(null);
+    setShowInstallPrompt(false);
+  };
+
   const t = TRANSLATIONS[locale] || TRANSLATIONS['en'];
 
   // Sync state from profile when loaded
@@ -779,7 +824,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-slate-50">
+      <div className="h-screen w-full max-w-full overflow-x-hidden flex items-center justify-center bg-slate-50">
         <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -1093,6 +1138,112 @@ function AppContent() {
                 Log Mood Now →
               </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PWA Android Install Dialog Banner */}
+      <AnimatePresence>
+        {showInstallPrompt && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-96 z-[100] bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-[24px] p-5 shadow-2xl flex flex-col gap-4"
+          >
+            <div className="flex justify-between items-start gap-3 text-left">
+              <div className="flex gap-3 text-left">
+                <span className="text-2xl pt-0.5 shrink-0">📱</span>
+                <div className="space-y-1 text-left">
+                  <h4 className="font-black text-xs uppercase tracking-wider text-teal-100 text-left">Install Preventive App</h4>
+                  <p className="text-xs font-bold leading-relaxed text-emerald-50 text-left">
+                    Save securely on your home screen for rapid offline tracking, warning telemetry alarms, and full-screen diagnostics!
+                  </p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setShowInstallPrompt(false)} 
+                className="text-white hover:text-teal-200 transition-colors shrink-0 p-1 font-black text-sm"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowInstallPrompt(false)}
+                className="text-[10px] font-black uppercase tracking-wider px-3.5 py-2 hover:bg-white/10 rounded-xl text-emerald-100 transition-all cursor-pointer"
+              >
+                Later
+              </button>
+              <button
+                type="button"
+                onClick={handleAndroidInstall}
+                className="text-[10px] font-black uppercase tracking-wider px-4.5 py-2.5 bg-white text-emerald-700 hover:bg-emerald-50 rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                Install App <ChevronRight size={10} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* PWA iOS Install Prompt / Helper Dialogue */}
+      <AnimatePresence>
+        {showIosInstallGuide && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-[360px] z-[120] bg-white dark:bg-[#203038] border border-slate-200 dark:border-[#2C414C] text-slate-800 dark:text-[#E3ECF0] rounded-[28px] p-6 shadow-2xl flex flex-col gap-4"
+          >
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-blue-500 animate-pulse" />
+                <h4 className="font-black text-xs uppercase tracking-wider text-slate-900 dark:text-white">Add App to iPhone</h4>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setShowIosInstallGuide(false);
+                  localStorage.setItem('dismissed_ios_install_prompt_temp', 'true');
+                }} 
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed text-left">
+              Apple Safari does not allow automatic 1-click installation. Connect this support hub in 3 simple taps:
+            </p>
+
+            <div className="space-y-3 pt-1 text-left">
+              <div className="flex gap-3 text-xs font-bold text-left">
+                <span className="w-5 h-5 bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-[10px] shrink-0 font-black">1</span>
+                <span>Tap the <span className="text-blue-600 dark:text-blue-400 font-extrabold">Share Icon</span> in Safari (the 📤 button).</span>
+              </div>
+              <div className="flex gap-3 text-xs font-bold text-left">
+                <span className="w-5 h-5 bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-[10px] shrink-0 font-black">2</span>
+                <span>Scroll down and select <span className="font-extrabold text-slate-900 dark:text-white">Add to Home Screen</span>.</span>
+              </div>
+              <div className="flex gap-3 text-xs font-bold text-left">
+                <span className="w-5 h-5 bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center text-[10px] shrink-0 font-black">3</span>
+                <span>Tap <span className="font-extrabold text-blue-600 dark:text-blue-400">Add</span> in the top-right corner. Done!</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowIosInstallGuide(false);
+                localStorage.setItem('dismissed_ios_install_prompt_temp', 'true');
+              }}
+              className="w-full mt-2 py-3 bg-slate-100 dark:bg-[#18262C] hover:bg-slate-200 dark:hover:bg-[#203038] text-slate-700 dark:text-white font-black text-[10px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+            >
+              Okay, Got It!
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

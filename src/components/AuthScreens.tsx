@@ -276,7 +276,7 @@ export function AuthScreens({ onCrisisClick, onSuccess }: AuthScreensProps) {
   };
 
   return (
-    <div className="min-h-screen w-screen flex flex-col items-center justify-center p-4 md:p-6 bg-slate-50 dark:bg-[#111C20] relative overflow-y-auto font-sans transition-colors">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden flex flex-col items-center justify-center p-4 md:p-6 bg-slate-50 dark:bg-[#111C20] relative overflow-y-auto font-sans transition-colors">
       {/* Background Ambience */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100/40 dark:bg-blue-900/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-100/40 dark:bg-emerald-900/10 rounded-full blur-[120px] pointer-events-none" />

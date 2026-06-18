@@ -4,9 +4,8 @@ import {
   X, 
   ChevronRight, 
   Compass, 
-  CheckCircle,
-  HelpCircle,
-  Sparkles
+  Sparkles,
+  ArrowBigDown
 } from 'lucide-react';
 
 interface TourStep {
@@ -177,8 +176,6 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
       targetView = 'dashboard';
     } else if (currentStep.id === 'choose_mood' || currentStep.id === 'save_mood') {
       targetView = 'mood';
-    } else if (currentStep.id === 'symptoms_tab') {
-      // Keep view selection or prepare
     } else if (currentStep.id === 'choose_symptom' || currentStep.id === 'save_symptoms') {
       targetView = 'symptoms';
     } else if (currentStep.id === 'reports') {
@@ -192,7 +189,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     }
   }, [currentStepIndex, currentStep, currentView, setCurrentView]);
 
-  // Continuously recalculate spot coordinates using requestAnimationFrame
+  // Track coordinates of the current step
   useEffect(() => {
     let active = true;
     let animationFrameId: number;
@@ -261,7 +258,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
           };
         });
       } else {
-        if (Date.now() - startTime > 300) {
+        if (Date.now() - startTime > 350) {
           setCoords(null);
         }
       }
@@ -273,7 +270,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
           if (active) {
             track();
           }
-        }, 100);
+        }, 120);
       }
     };
 
@@ -314,41 +311,44 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     };
   }, [currentStepIndex, currentView]);
 
-  // Click on direct targeted elements automatically advancement trigger
+  // Click interceptor at capture level ensures interactive step auto-advances
   useEffect(() => {
-    if (!currentStep) return;
+    if (!currentStep || !currentStep.isInteractive) return;
 
-    // Find custom dynamic target
-    const getTargetElement = (): HTMLElement | null => {
-      if (currentStep.targetId === 'nav-crisis') {
-        const desktopCrisis = document.getElementById('nav-crisis');
-        const isDesktopVisible = desktopCrisis && desktopCrisis.getBoundingClientRect().width > 0;
-        return isDesktopVisible ? desktopCrisis : document.getElementById('dashboard-crisis-btn');
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target) return;
+
+      const targetId = currentStep.targetId;
+      let matched = false;
+
+      if (targetId === 'nav-crisis') {
+        if (target.closest('#nav-crisis') || target.closest('#dashboard-crisis-btn')) {
+          matched = true;
+        }
+      } else {
+        if (target.closest(`[id="${targetId}"]`)) {
+          matched = true;
+        }
       }
-      return document.getElementById(currentStep.targetId);
-    };
 
-    const element = getTargetElement();
-    if (!element) return;
-
-    const handleTargetClick = () => {
-      setTimeout(() => {
-        if (currentStep.isInteractive) {
+      if (matched) {
+        setTimeout(() => {
           setCurrentStepIndex(index => {
             if (index < TOUR_STEPS.length - 1) {
               return index + 1;
             }
             return index;
           });
-        }
-      }, 300);
+        }, 350);
+      }
     };
 
-    element.addEventListener('click', handleTargetClick);
+    window.addEventListener('click', handleGlobalClick, true);
     return () => {
-      element.removeEventListener('click', handleTargetClick);
+      window.removeEventListener('click', handleGlobalClick, true);
     };
-  }, [currentStepIndex, currentStep, currentView]);
+  }, [currentStepIndex, currentStep]);
 
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
@@ -364,7 +364,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     }
   };
 
-  // Build responsive, non-overlapping card positions
+  // Build responsive, non-overlapping card positions without using viewports
   const getCardStyle = () => {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
@@ -382,7 +382,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
           bottom: positionAtTop ? 'auto' : '16px',
           left: '16px',
           right: '16px',
-          maxWidth: 'calc(100vw - 32px)',
+          maxWidth: 'calc(100% - 32px)',
           margin: '0 auto',
           zIndex: 10001,
         }
@@ -468,17 +468,17 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
   return (
     <div id="interactive-tour-overlay" className="fixed inset-0 z-[9999] pointer-events-none select-none">
       
-      {/* Background Mask */}
+      {/* Background Mask - Softened dimming as requested to keep context recognizable */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3 }}
-        className="absolute inset-0 bg-black/60 dark:bg-black/80 pointer-events-auto backdrop-blur-[1.5px]"
+        className="absolute inset-0 bg-black/25 dark:bg-black/55 pointer-events-auto backdrop-blur-[0.5px]"
         style={{ clipPath: getClipPath() }}
       />
 
-      {/* Target Focus Ring Overlay */}
+      {/* Target Focus Ring Overlay with pulsing ring glow */}
       <AnimatePresence mode="wait">
         {coords && (
           <motion.div
@@ -487,47 +487,50 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute border-2 border-emerald-500 rounded-2xl pointer-events-none z-[9998] shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+            className="absolute border-[3px] border-emerald-500 rounded-2xl pointer-events-none z-[9998] shadow-[0_0_20px_rgba(16,185,129,0.7)]"
             style={{
               position: 'absolute',
-              top: `${coords.top - 4}px`,
-              left: `${coords.left - 4}px`,
-              width: `${coords.width + 8}px`,
-              height: `${coords.height + 8}px`,
+              top: `${coords.top - 6}px`,
+              left: `${coords.left - 6}px`,
+              width: `${coords.width + 12}px`,
+              height: `${coords.height + 12}px`,
             }}
           >
-            <span className="absolute inset-0 rounded-2xl border border-emerald-400 animate-pulse opacity-75" />
+            <span className="absolute inset-x-0 -top-10 flex h-8 items-center justify-center pointer-events-none animate-bounce">
+              <ArrowBigDown className="text-emerald-500 fill-emerald-500 animate-pulse" size={32} />
+            </span>
+            <span className="absolute inset-0 rounded-2xl border-2 border-emerald-400 animate-pulse opacity-90" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Guiding Cursor Hand Indicator */}
+      {/* Guiding Cursor Hand Element - pointing straight up '👆' from exactly below the target box */}
       <AnimatePresence mode="wait">
         {coords && (
           <motion.div
             key={`cursor-step-${currentStepIndex}`}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, y: 5 }}
             style={{ 
               position: 'absolute',
-              top: `${coords.top + (coords.height / 2) - 12}px`,
-              left: `${coords.left + (coords.width / 2) - 12}px`,
+              top: `${coords.top + coords.height + 4}px`,
+              left: `${coords.left + (coords.width / 2) - 36}px`,
             }}
-            className="z-[10000] pointer-events-none"
+            className="z-[10000] pointer-events-none flex flex-col items-center"
           >
-            <div className="relative">
-              <span className="absolute inline-flex h-8 w-8 rounded-full bg-emerald-500/40 animate-ping" />
-              <div className="absolute inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white shadow-lg" />
+            <div className="relative flex flex-col items-center">
+              {/* Animated Ripple ring underneath hand */}
+              <span className="absolute -top-3 inline-flex h-12 w-12 rounded-full bg-emerald-500/25 animate-ping" />
               
               <motion.div 
-                animate={{ y: [0, -6, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-                className="absolute top-3 left-3 bg-white dark:bg-[#18262C] border border-slate-200 dark:border-[#2C414C] p-1.5 rounded-xl shadow-xl flex items-center gap-1.5 shrink-0"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+                className="bg-white dark:bg-[#18262C] border-2 border-emerald-500 p-2 rounded-xl shadow-2xl flex items-center gap-1.5 shrink-0"
               >
-                <span className="text-lg">👆</span>
-                <span className="text-[8px] font-black uppercase text-slate-500 dark:text-slate-400 tracking-wider whitespace-nowrap">
-                  {currentStep.isInteractive ? 'Log Here' : 'Point Here'}
+                <span className="text-xl">👆</span>
+                <span className="text-[9px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider whitespace-nowrap">
+                  {currentStep.isInteractive ? 'Click here!' : 'Primary spot'}
                 </span>
               </motion.div>
             </div>
@@ -546,7 +549,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
               exit={{ opacity: 0, y: -15, scale: 0.95 }}
               transition={{ duration: 0.2 }}
               style={cardPosition.style}
-              className="pointer-events-auto bg-white dark:bg-[#203038] border border-slate-200 dark:border-[#2C414C] p-5 rounded-[24px] shadow-2xl flex flex-col gap-4 z-[10001] text-left"
+              className="pointer-events-auto bg-white/95 dark:bg-[#203038] border border-slate-200 dark:border-[#2C414C] p-5 rounded-[24px] shadow-2xl flex flex-col gap-4 z-[10001] text-left backdrop-blur-md"
             >
               {/* Header */}
               <div className="flex justify-between items-center bg-slate-50 dark:bg-[#18262C] -mx-5 -mt-5 p-3 px-4 rounded-t-[24px] border-b border-slate-100 dark:border-[#2C414C]">
@@ -556,7 +559,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
                 </div>
                 <button 
                   onClick={onClose}
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors pointer-events-auto"
                   title="Skip Tour"
                 >
                   <X size={12} />
@@ -573,7 +576,7 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
                 </p>
                 {currentStep.isInteractive && (
                   <div className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 p-1.5 rounded-lg text-amber-800 dark:text-amber-400 font-bold text-[9px] uppercase tracking-wider mt-1.5">
-                    <Sparkles size={10} className="animate-pulse" /> Practice Action Required!
+                    <Sparkles size={10} className="animate-pulse text-amber-600" /> Complete This Action To Advance Automatically!
                   </div>
                 )}
               </div>
@@ -587,24 +590,31 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
                 <div className="flex gap-2">
                   <button 
                     onClick={onClose}
-                    className="px-2.5 py-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer"
+                    className="px-2.5 py-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer pointer-events-auto"
                   >
                     Skip
                   </button>
                   {currentStepIndex > 0 && (
                     <button 
                       onClick={handlePrev}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#18262C] dark:hover:bg-[#2a3c46] text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#18262C] dark:hover:bg-[#2a3c46] text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer pointer-events-auto"
                     >
                       Back
                     </button>
                   )}
-                  <button 
-                    onClick={handleNext}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-1 cursor-pointer"
-                  >
-                    {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'} <ChevronRight size={10} />
-                  </button>
+                  {/* Hide Next button on interactive steps so users learn by clicking the app element */}
+                  {!currentStep.isInteractive ? (
+                    <button 
+                      onClick={handleNext}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-1 cursor-pointer pointer-events-auto"
+                    >
+                      {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'} <ChevronRight size={10} />
+                    </button>
+                  ) : (
+                    <div className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[9px] font-extrabold uppercase rounded-lg border border-blue-100 dark:border-blue-950 animate-pulse text-center">
+                      Awaiting Action...
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
