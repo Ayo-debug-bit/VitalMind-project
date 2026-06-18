@@ -4,8 +4,7 @@ import {
   X, 
   ChevronRight, 
   Compass, 
-  Sparkles,
-  ArrowBigDown
+  Sparkles
 } from 'lucide-react';
 
 interface TourStep {
@@ -15,6 +14,7 @@ interface TourStep {
   description: string;
   arrowPosition: 'top' | 'bottom' | 'left' | 'right';
   badge: string;
+  type: 'action' | 'information' | 'navigation';
   isInteractive?: boolean;
 }
 
@@ -22,120 +22,134 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'welcome',
     targetId: 'header-wellness-state',
-    title: "1. Welcome! Let's Practice",
-    description: "Welcome to your Preventive Healthcare & Mental Wellness assistance workspace. Let's do a quick, hands-on practice walkthrough of how everything connects to build your mental model!",
+    title: "1. Welcome, Let's Explore!",
+    description: "Welcome to your Preventive Healthcare & Mental Wellness workspace. Let's do a friendly guided walkthrough to build your spatial layout awareness. Click 'Next' to begin!",
     arrowPosition: 'top',
-    badge: 'Onboarding System'
+    badge: 'Onboarding System',
+    type: 'navigation'
   },
   {
     id: 'wellness_index',
     targetId: 'header-wellness-state',
     title: '2. Your Wellness Indicator',
-    description: "This is your calculated overall Wellness Score. When you log your mood and physical symptoms regularly, our clinically vetted rules evaluate your status to guide your clinical & preventive actions!",
+    description: "This is your calculated overall Wellness Index. When you log your mood and physical symptoms regularly, our rule engine evaluates your data to trigger clinical guidance.",
     arrowPosition: 'top',
-    badge: 'State Score'
+    badge: 'Wellness Scale',
+    type: 'information'
   },
   {
     id: 'mood_tab',
     targetId: 'nav-mood',
     title: '3. Tap to track your Mood',
-    description: 'Let\'s try it! Tap the "Mood" button highlighted below in the navigation bar to open the Mood Tracker dashboard.',
+    description: "Let's log your first mood! Tap the highlighted Mood button in the navigation bar to pull up the Mood Tracker module.",
     arrowPosition: 'bottom',
-    badge: 'Hands-on Practice',
+    badge: 'Interactive Lab',
+    type: 'action',
     isInteractive: true
   },
   {
     id: 'choose_mood',
     targetId: 'mood-btn-Calm',
     title: '4. Choose Mood "Calm"',
-    description: 'Wonderful! Now select a mood to register. Click the "Calm" emoji button highlighted in the spotlight catalog.',
+    description: "Now let's record how you feel. Click the 'Calm' emoji card highlighted below to select it.",
     arrowPosition: 'bottom',
-    badge: 'Choose Mood',
+    badge: 'Interactive Lab',
+    type: 'action',
     isInteractive: true
   },
   {
     id: 'save_mood',
     targetId: 'mood-submit-btn',
     title: '5. Submit Mood Entry',
-    description: 'Look at that! Once selected, click the green "Confirm Mood Entry" button to save your mood and return back.',
+    description: "To register your current state, click the 'Confirm Mood Entry' button to save your log securely.",
     arrowPosition: 'top',
-    badge: 'Save Entry',
+    badge: 'Interactive Lab',
+    type: 'action',
     isInteractive: true
   },
   {
     id: 'symptoms_tab',
     targetId: 'nav-symptoms',
     title: '6. Open Symptom Logger',
-    description: 'Excellent mood check-in! Next, let\'s learn how to log a symptom. Tap the "Symptoms" tab highlighted below.',
+    description: "Great mood reflection! Next, let's learn how to log symptoms. Tap the Symptoms tab highlighted below.",
     arrowPosition: 'bottom',
-    badge: 'Symptom Entry',
+    badge: 'Interactive Lab',
+    type: 'action',
     isInteractive: true
   },
   {
     id: 'choose_symptom',
     targetId: 'symptom-btn-Fatigue',
     title: '7. Log "Fatigue" Symptom',
-    description: 'Well done! Select markers present in your current state to log them. Click the "Fatigue" card highlighted below.',
+    description: "Click the 'Fatigue' card highlighted below to add this physical biomarker to your status checklist.",
     arrowPosition: 'top',
-    badge: 'Hands-on',
+    badge: 'Interactive Lab',
+    type: 'action',
     isInteractive: true
   },
   {
     id: 'save_symptoms',
     targetId: 'symptom-submit-btn',
     title: '8. Submit Symptom Log',
-    description: 'Great! Now save your reports securely. Click the blue "Submit Symptom Log" button to record this and return.',
+    description: "Perfect! Record this securely. Click the blue 'Submit Symptom Log' button to compute warning metrics.",
     arrowPosition: 'top',
-    badge: 'Save Symptoms',
+    badge: 'Interactive Lab',
+    type: 'action',
     isInteractive: true
   },
   {
     id: 'preventive_care',
     targetId: 'tour-preventive-care',
     title: '9. Preventive Care Vitals',
-    description: 'Amazing! Now look at the Preventive Care recommendations. Vetted clinical guidelines for age & sex update dynamically to ensure you stay healthy.',
+    description: "This pane automatically displays age- and sex-specific medical action recommendations. It updates dynamically as vetted guidelines refresh, keeping you aligned.",
     arrowPosition: 'top',
-    badge: 'Preventive Actions'
+    badge: 'Educational Insight',
+    type: 'information'
   },
   {
     id: 'intelligence_center',
     targetId: 'tour-intelligence-center',
     title: '10. Intelligence Insights',
-    description: 'Here is your rule-based Intelligence Center. It computes warning markers over 14-day rolling windows to suggest medical actions, so check it regularly!',
+    description: "This is your rule-based Intelligence Hub. It compiles health signals over a rolling 14-day window to raise preventative alert rules. Check this regularly to catch warnings early!",
     arrowPosition: 'top',
-    badge: 'Smart Center'
+    badge: 'Educational Insight',
+    type: 'information'
   },
   {
     id: 'peer_community',
     targetId: 'tour-peer-community',
     title: '11. Safe Peer Space',
-    description: 'Connect with other peers anonymously, vote on wellness topics, and build your supportive medical circle securely!',
+    description: "A secure, confidential space to interact anonymously with peers, coordinate support networks, and participate in peer-voted wellness discussions.",
     arrowPosition: 'top',
-    badge: 'Peer Network'
+    badge: 'Navigation Hub',
+    type: 'navigation'
   },
   {
     id: 'emergency_support',
     targetId: 'nav-crisis',
     title: '12. Crisis & Emergency Support',
-    description: 'Your safety is absolutely critical. For any immediate assistance or suicidal/self-harm warnings, emergency advisors and pre-saved safety circle dispatchers are always one-tap away here.',
+    description: "Your health and safety comes first. For any self-harm warnings or immediate crisis assistance, responders and pre-selected contacts are available one-tap away.",
     arrowPosition: 'bottom',
-    badge: 'Emergency Help'
+    badge: 'Navigation Hub',
+    type: 'navigation'
   },
   {
     id: 'reports',
     targetId: 'tour-wellness-reports',
-    title: '13. Clinical Wellness Reports',
-    description: 'Need to consult with a doctor? Click the "History" section anytime to download high-contrast formatted PDF reports to share with clinical practitioners.',
+    title: '13. High-Contrast Health Reports',
+    description: "Whenever you consult a clinician, use the history segment to download high-contrast formatted PDF trackers of your overall wellness indicators.",
     arrowPosition: 'bottom',
-    badge: 'PDF Exports'
+    badge: 'Educational Insight',
+    type: 'information'
   },
   {
     id: 'profile_instructions',
-    targetId: 'tour-profile-btn',
-    title: '14. Easy Mode & Translations',
-    description: 'Lastly, click your Profile anytime to switch to Easy Mode (adding full reading voice prompts) or change between Hausa, Igbo, Yoruba, or English translations!',
+    targetId: 'settings-easy-mode-btn',
+    title: '14. Easy Mode & Languages',
+    description: "Lastly, click your Profile anytime to switch to Easy Mode (providing read-aloud spoken prompts) or translate the hub between English, Hausa, Igbo, and Yoruba!",
     arrowPosition: 'top',
-    badge: 'Done!'
+    badge: 'Navigation Hub',
+    type: 'navigation'
   }
 ];
 
@@ -149,85 +163,152 @@ interface InteractiveTourProps {
 export function InteractiveTour({ onClose, theme = 'light', currentView, setCurrentView }: InteractiveTourProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [coords, setCoords] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const lastScrollIndexRef = useRef<number>(-1);
 
   const currentStep = TOUR_STEPS[currentStepIndex];
+  const PADDING = 6; // px padding around masks to prevent target overlapping and blocking mob inputs
 
-  // Save completion status to localStorage
+  // Automatically collapse action/interactive steps by default
+  useEffect(() => {
+    if (currentStep) {
+      setIsCollapsed(currentStep.type === 'action');
+    }
+  }, [currentStepIndex, currentStep?.id]);
+
+  // A ref to keep track of the absolute latest step index to prevent duplicate or asynchronous race conditions
+  const currentStepIndexRef = useRef(currentStepIndex);
+  useEffect(() => {
+    currentStepIndexRef.current = currentStepIndex;
+  }, [currentStepIndex]);
+
+  // Resolves target views dynamically depending on stepId
+  const getStepView = (stepId: string): 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile' | 'crisis' => {
+    if (
+      stepId === 'welcome' || 
+      stepId === 'wellness_index' ||
+      stepId === 'mood_tab' ||
+      stepId === 'preventive_care' ||
+      stepId === 'intelligence_center' ||
+      stepId === 'peer_community' ||
+      stepId === 'emergency_support'
+    ) {
+      return 'dashboard';
+    }
+    if (stepId === 'choose_mood' || stepId === 'save_mood') {
+      return 'mood';
+    }
+    if (stepId === 'choose_symptom' || stepId === 'save_symptoms') {
+      return 'symptoms';
+    }
+    if (stepId === 'reports') {
+      return 'history';
+    }
+    if (stepId === 'profile_instructions') {
+      return 'profile';
+    }
+    return 'dashboard';
+  };
+
+  // Safe and synchronized step switcher carrying view updates to completely block race condition flickers
+  const changeStep = (newIndex: number) => {
+    if (newIndex < 0 || newIndex >= TOUR_STEPS.length) return;
+    
+    const nextStep = TOUR_STEPS[newIndex];
+    const targetView = getStepView(nextStep.id);
+    
+    setCurrentStepIndex(newIndex);
+    
+    // Smoothly click report tabs programmatically if transitioning into History report step
+    if (nextStep.id === 'reports') {
+      setTimeout(() => {
+        const tabEl = document.getElementById('tour-wellness-reports');
+        if (tabEl) tabEl.click();
+      }, 350);
+    }
+
+    if (currentView !== targetView) {
+      setCurrentView(targetView);
+    }
+  };
+
+  // Completely immune to batching and async overlaps: Checks if the step being advanced from is still currently active
+  const safeAdvance = (fromIndex: number) => {
+    if (currentStepIndexRef.current === fromIndex) {
+      changeStep(fromIndex + 1);
+    }
+  };
+
+  const safeJump = (fromIndex: number, toIndex: number) => {
+    if (currentStepIndexRef.current === fromIndex) {
+      changeStep(toIndex);
+    }
+  };
+
+  // Store tour completeness in localStorage
   const handleTourFinish = () => {
     localStorage.setItem('preventive_healthcare_tour_completed', 'true');
     onClose();
   };
 
-  // Automatically switch view based on current step
+  // Synchronize step with manual/button click view transitions ONLY if they are intended navigation triggers
   useEffect(() => {
-    if (!currentStep) return;
-    
-    let targetView: 'dashboard' | 'mood' | 'symptoms' | 'history' | 'resources' | 'profile' | 'crisis' | null = null;
-    
-    if (
-      currentStep.id === 'welcome' || 
-      currentStep.id === 'wellness_index' ||
-      currentStep.id === 'mood_tab' ||
-      currentStep.id === 'preventive_care' ||
-      currentStep.id === 'intelligence_center' ||
-      currentStep.id === 'peer_community'
-    ) {
-      targetView = 'dashboard';
-    } else if (currentStep.id === 'choose_mood' || currentStep.id === 'save_mood') {
-      targetView = 'mood';
-    } else if (currentStep.id === 'choose_symptom' || currentStep.id === 'save_symptoms') {
-      targetView = 'symptoms';
-    } else if (currentStep.id === 'reports') {
-      targetView = 'history';
-    } else if (currentStep.id === 'profile_instructions') {
-      targetView = 'profile';
+    if (currentStep.id === 'mood_tab' && currentView === 'mood') {
+      safeAdvance(currentStepIndex);
+    } else if (currentStep.id === 'symptoms_tab' && currentView === 'symptoms') {
+      safeAdvance(currentStepIndex);
+    } else if (currentStep.id === 'save_mood' && currentView === 'dashboard') {
+      const targetIndex = TOUR_STEPS.findIndex(s => s.id === 'symptoms_tab');
+      if (targetIndex !== -1) {
+        safeJump(currentStepIndex, targetIndex);
+      }
+    } else if (currentStep.id === 'save_symptoms' && currentView === 'dashboard') {
+      const targetIndex = TOUR_STEPS.findIndex(s => s.id === 'preventive_care');
+      if (targetIndex !== -1) {
+        safeJump(currentStepIndex, targetIndex);
+      }
     }
-    
-    if (targetView && currentView !== targetView) {
-      setCurrentView(targetView);
-    }
-  }, [currentStepIndex, currentStep, currentView, setCurrentView]);
+  }, [currentView, currentStepIndex]);
 
-  // Track coordinates of the current step
+  // Robust element finder selecting visible candidates
+  const findElement = (): HTMLElement | null => {
+    if (!currentStep) return null;
+    let element: HTMLElement | null = null;
+
+    // Crisis fallback detection
+    if (currentStep.targetId === 'nav-crisis') {
+      const desktopCrisis = document.getElementById('nav-crisis');
+      const isDesktopVisible = desktopCrisis && desktopCrisis.getBoundingClientRect().width > 0;
+      if (isDesktopVisible) {
+        element = desktopCrisis;
+      } else {
+        element = document.getElementById('dashboard-crisis-btn');
+      }
+    } else {
+      // Robust Candidate Query loops through duplicates (Desktop Sidebar vs Mobile bottoms)
+      const candidates = document.querySelectorAll(`[id="${currentStep.targetId}"]`);
+      for (let i = 0; i < candidates.length; i++) {
+        const el = candidates[i] as HTMLElement;
+        const rect = el.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          element = el;
+          break;
+        }
+      }
+      if (!element) {
+        element = document.getElementById(currentStep.targetId);
+      }
+    }
+    return element;
+  };
+
+  // Track physical position/vitals of the highlighted step target
   useEffect(() => {
     let active = true;
     let animationFrameId: number;
     const startTime = Date.now();
-    const trackingDuration = 2000;
+    const trackingDuration = 2500;
     
-    const findElement = (): HTMLElement | null => {
-      if (!currentStep) return null;
-      let element: HTMLElement | null = null;
-
-      // Special fallback matching for emergency button (desktop vs mobile)
-      if (currentStep.targetId === 'nav-crisis') {
-        const desktopCrisis = document.getElementById('nav-crisis');
-        const isDesktopVisible = desktopCrisis && desktopCrisis.getBoundingClientRect().width > 0;
-        if (isDesktopVisible) {
-          element = desktopCrisis;
-        } else {
-          element = document.getElementById('dashboard-crisis-btn');
-        }
-      } else if (currentStep.targetId.startsWith('nav-')) {
-        const candidates = document.querySelectorAll(`[id="${currentStep.targetId}"]`);
-        for (let i = 0; i < candidates.length; i++) {
-          const el = candidates[i] as HTMLElement;
-          const rect = el.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) {
-            element = el;
-            break;
-          }
-        }
-        if (!element) {
-          element = document.getElementById(currentStep.targetId);
-        }
-      } else {
-        element = document.getElementById(currentStep.targetId);
-      }
-      return element;
-    };
-
     const track = () => {
       if (!active) return;
       
@@ -258,7 +339,8 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
           };
         });
       } else {
-        if (Date.now() - startTime > 350) {
+        // Safe timeout fallback
+        if (Date.now() - startTime > 400) {
           setCoords(null);
         }
       }
@@ -311,48 +393,92 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
     };
   }, [currentStepIndex, currentView]);
 
-  // Click interceptor at capture level ensures interactive step auto-advances
+  // Unified deterministic state and CustomEvent observers
   useEffect(() => {
-    if (!currentStep || !currentStep.isInteractive) return;
+    if (!currentStep) return;
 
-    const handleGlobalClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target) return;
+    const stepIndexAtSetup = currentStepIndex;
 
-      const targetId = currentStep.targetId;
-      let matched = false;
-
-      if (targetId === 'nav-crisis') {
-        if (target.closest('#nav-crisis') || target.closest('#dashboard-crisis-btn')) {
-          matched = true;
-        }
-      } else {
-        if (target.closest(`[id="${targetId}"]`)) {
-          matched = true;
-        }
-      }
-
-      if (matched) {
-        setTimeout(() => {
-          setCurrentStepIndex(index => {
-            if (index < TOUR_STEPS.length - 1) {
-              return index + 1;
-            }
-            return index;
-          });
-        }, 350);
+    const onMoodSelected = (e: Event) => {
+      const ce = e as CustomEvent;
+      if (currentStep.id === 'choose_mood' && ce.detail?.mood === 'Calm') {
+        safeAdvance(stepIndexAtSetup);
       }
     };
 
-    window.addEventListener('click', handleGlobalClick, true);
+    const onMoodSaved = () => {
+      if (currentStep.id === 'save_mood') {
+        const targetIdx = TOUR_STEPS.findIndex(s => s.id === 'symptoms_tab');
+        if (targetIdx !== -1) {
+          safeJump(stepIndexAtSetup, targetIdx);
+        }
+      }
+    };
+
+    const onSymptomSelected = (e: Event) => {
+      const ce = e as CustomEvent;
+      if (currentStep.id === 'choose_symptom' && ce.detail?.symptom === 'Fatigue') {
+        safeAdvance(stepIndexAtSetup);
+      }
+    };
+
+    const onSymptomSaved = () => {
+      if (currentStep.id === 'save_symptoms') {
+        const targetIdx = TOUR_STEPS.findIndex(s => s.id === 'preventive_care');
+        if (targetIdx !== -1) {
+          safeJump(stepIndexAtSetup, targetIdx);
+        }
+      }
+    };
+
+    window.addEventListener('tour_mood_selected', onMoodSelected);
+    window.addEventListener('tour_mood_saved', onMoodSaved);
+    window.addEventListener('tour_symptom_selected', onSymptomSelected);
+    window.addEventListener('tour_symptom_saved', onSymptomSaved);
+
+    // C. Traditional click intersection capturing fallback
+    let handleGlobalClick: ((e: MouseEvent) => void) | null = null;
+    if (currentStep.type === 'action') {
+      handleGlobalClick = (e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target) return;
+
+        const targetId = currentStep.targetId;
+        let matched = false;
+
+        if (targetId === 'nav-crisis') {
+          if (target.closest('#nav-crisis') || target.closest('#dashboard-crisis-btn')) {
+            matched = true;
+          }
+        } else {
+          if (target.closest(`[id="${targetId}"]`)) {
+            matched = true;
+          }
+        }
+
+        if (matched) {
+          setTimeout(() => {
+            safeAdvance(stepIndexAtSetup);
+          }, 180);
+        }
+      };
+      window.addEventListener('click', handleGlobalClick, true);
+    }
+
     return () => {
-      window.removeEventListener('click', handleGlobalClick, true);
+      window.removeEventListener('tour_mood_selected', onMoodSelected);
+      window.removeEventListener('tour_mood_saved', onMoodSaved);
+      window.removeEventListener('tour_symptom_selected', onSymptomSelected);
+      window.removeEventListener('tour_symptom_saved', onSymptomSaved);
+      if (handleGlobalClick) {
+        window.removeEventListener('click', handleGlobalClick, true);
+      }
     };
   }, [currentStepIndex, currentStep]);
 
   const handleNext = () => {
     if (currentStepIndex < TOUR_STEPS.length - 1) {
-      setCurrentStepIndex(prev => prev + 1);
+      changeStep(currentStepIndex + 1);
     } else {
       handleTourFinish();
     }
@@ -360,11 +486,11 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
 
   const handlePrev = () => {
     if (currentStepIndex > 0) {
-      setCurrentStepIndex(prev => prev - 1);
+      changeStep(currentStepIndex - 1);
     }
   };
 
-  // Build responsive, non-overlapping card positions without using viewports
+  // Build responsive, non-overlapping floating prompt card positions
   const getCardStyle = () => {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
@@ -400,8 +526,8 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
       };
     }
 
-    const cardWidth = 350;
-    const estimatedCardHeight = 225;
+    const cardWidth = 360;
+    const estimatedCardHeight = 220;
     
     let top = coords.top + coords.height + 16;
     let left = coords.left + (coords.width / 2) - (cardWidth / 2);
@@ -443,94 +569,149 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
 
   const cardPosition = getCardStyle();
 
-  const getClipPath = () => {
-    if (!coords) return 'polygon(0% 0%, 0% 100%, 100% 100%, 100% 0%)';
-    const padding = 6;
-    const cl = Math.max(0, coords.left - padding);
-    const ct = Math.max(0, coords.top - padding);
-    const cw = coords.width + (padding * 2);
-    const ch = coords.height + (padding * 2);
+  // Position cursor hand dynamically depending on screen space coordinates
+  const getCursorProps = () => {
+    if (!coords) return null;
     
-    return `polygon(
-      0% 0%, 
-      0% 100%, 
-      ${cl}px 100%, 
-      ${cl}px ${ct}px, 
-      ${cl + cw}px ${ct}px, 
-      ${cl + cw}px ${ct + ch}px, 
-      ${cl}px ${ct + ch}px, 
-      ${cl}px 100%, 
-      100% 100%, 
-      100% 0%
-    )`;
+    const targetMiddleX = coords.left + (coords.width / 2);
+    const isNearBottom = (coords.top + (coords.height / 2)) > window.innerHeight * 0.55;
+    
+    if (isNearBottom) {
+      return {
+        top: `${coords.top - 58}px`,
+        left: `${targetMiddleX - 36}px`,
+        emoji: '👇',
+        yOffset: [0, 8, 0] // Bounce downwards
+      };
+    } else {
+      return {
+        top: `${coords.top + coords.height + 8}px`,
+        left: `${targetMiddleX - 36}px`,
+        emoji: '👆',
+        yOffset: [0, -8, 0] // Bounce upwards
+      };
+    }
+  };
+
+  const cursorProps = getCursorProps();
+  const isTargetAtTop = coords && coords.top < 140;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+  // Color code styles based on Type
+  const getBadgeColors = (type: 'action' | 'information' | 'navigation') => {
+    switch (type) {
+      case 'action':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/30';
+      case 'information':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200/50';
+      default:
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200/50';
+    }
   };
 
   return (
     <div id="interactive-tour-overlay" className="fixed inset-0 z-[9999] pointer-events-none select-none">
       
-      {/* Background Mask - Softened dimming as requested to keep context recognizable */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="absolute inset-0 bg-black/25 dark:bg-black/55 pointer-events-auto backdrop-blur-[0.5px]"
-        style={{ clipPath: getClipPath() }}
-      />
+      {/* 4-Panel Moderate Mask allows Spatial Awareness & keeps viewport visible */}
+      {coords ? (
+        <>
+          {/* Top light sheet */}
+          <div 
+            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
+            style={{
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: `${Math.max(0, coords.top - PADDING)}px`,
+            }}
+          />
+          {/* Bottom light sheet */}
+          <div 
+            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
+            style={{
+              top: `${coords.top + coords.height + PADDING}px`,
+              left: 0,
+              width: '100vw',
+              bottom: 0,
+            }}
+          />
+          {/* Left light sheet */}
+          <div 
+            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
+            style={{
+              top: `${Math.max(0, coords.top - PADDING)}px`,
+              left: 0,
+              width: `${Math.max(0, coords.left - PADDING)}px`,
+              height: `${coords.height + 2 * PADDING}px`,
+            }}
+          />
+          {/* Right light sheet */}
+          <div 
+            className="fixed bg-slate-900/10 dark:bg-black/20 z-[9990] pointer-events-auto transition-all duration-150"
+            style={{
+              top: `${Math.max(0, coords.top - PADDING)}px`,
+              left: `${coords.left + coords.width + PADDING}px`,
+              right: 0,
+              height: `${coords.height + 2 * PADDING}px`,
+            }}
+          />
+        </>
+      ) : (
+        <div className="fixed inset-0 bg-slate-900/12 dark:bg-black/35 z-[9990] pointer-events-auto" />
+      )}
 
-      {/* Target Focus Ring Overlay with pulsing ring glow */}
-      <AnimatePresence mode="wait">
+      {/* Target focus glowing indicators */}
+      <AnimatePresence>
         {coords && (
           <motion.div
-            key={`focus-ring-${currentStepIndex}`}
-            initial={{ opacity: 0, scale: 1.08 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute border-[3px] border-emerald-500 rounded-2xl pointer-events-none z-[9998] shadow-[0_0_20px_rgba(16,185,129,0.7)]"
+            key="focus-ring"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ 
+              top: coords.top - PADDING - 3,
+              left: coords.left - PADDING - 3,
+              width: coords.width + 2 * PADDING + 6,
+              height: coords.height + 2 * PADDING + 6,
+              opacity: 1, 
+              scale: 1 
+            }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 220, damping: 26 }}
+            className="absolute border-[3px] border-emerald-500 rounded-2xl pointer-events-none z-[9998] shadow-[0_0_15px_rgba(16,185,129,0.5)]"
             style={{
               position: 'absolute',
-              top: `${coords.top - 6}px`,
-              left: `${coords.left - 6}px`,
-              width: `${coords.width + 12}px`,
-              height: `${coords.height + 12}px`,
             }}
           >
-            <span className="absolute inset-x-0 -top-10 flex h-8 items-center justify-center pointer-events-none animate-bounce">
-              <ArrowBigDown className="text-emerald-500 fill-emerald-500 animate-pulse" size={32} />
-            </span>
-            <span className="absolute inset-0 rounded-2xl border-2 border-emerald-400 animate-pulse opacity-90" />
+            <span className="absolute inset-0 rounded-2xl border-2 border-emerald-400/80 animate-pulse opacity-90" />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Guiding Cursor Hand Element - pointing straight up '👆' from exactly below the target box */}
+      {/* Adaptive hand pointer cursor with corresponding emoji orientation (👆 vs 👇) */}
       <AnimatePresence mode="wait">
-        {coords && (
+        {cursorProps && (
           <motion.div
             key={`cursor-step-${currentStepIndex}`}
-            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
             style={{ 
               position: 'absolute',
-              top: `${coords.top + coords.height + 4}px`,
-              left: `${coords.left + (coords.width / 2) - 36}px`,
+              top: cursorProps.top,
+              left: cursorProps.left,
             }}
             className="z-[10000] pointer-events-none flex flex-col items-center"
           >
             <div className="relative flex flex-col items-center">
-              {/* Animated Ripple ring underneath hand */}
-              <span className="absolute -top-3 inline-flex h-12 w-12 rounded-full bg-emerald-500/25 animate-ping" />
+              <span className="absolute inline-flex h-10 w-10 rounded-full bg-emerald-500/20 animate-ping" />
               
               <motion.div 
-                animate={{ y: [0, -8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-                className="bg-white dark:bg-[#18262C] border-2 border-emerald-500 p-2 rounded-xl shadow-2xl flex items-center gap-1.5 shrink-0"
+                animate={{ y: cursorProps.yOffset }}
+                transition={{ repeat: Infinity, duration: 1.3, ease: "easeInOut" }}
+                className="bg-white dark:bg-[#1C2C33] border border-emerald-500 py-1.5 px-2.5 rounded-xl shadow-xl flex items-center gap-1.5 shrink-0"
               >
-                <span className="text-xl">👆</span>
-                <span className="text-[9px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider whitespace-nowrap">
-                  {currentStep.isInteractive ? 'Click here!' : 'Primary spot'}
+                <span className="text-xl leading-none">{cursorProps.emoji}</span>
+                <span className="text-[8px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider whitespace-nowrap">
+                  {currentStep.type === 'action' ? 'Click here!' : 'Notice here'}
                 </span>
               </motion.div>
             </div>
@@ -538,86 +719,181 @@ export function InteractiveTour({ onClose, theme = 'light', currentView, setCurr
         )}
       </AnimatePresence>
 
-      {/* Guide Floating Card */}
+      {/* Guidance floating card OR Compact Action Mode Pill */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-text">
         <div className="relative w-full h-full">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={`tour-card-${currentStepIndex}`}
-              initial={{ opacity: 0, y: 15, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -15, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-              style={cardPosition.style}
-              className="pointer-events-auto bg-white/95 dark:bg-[#203038] border border-slate-200 dark:border-[#2C414C] p-5 rounded-[24px] shadow-2xl flex flex-col gap-4 z-[10001] text-left backdrop-blur-md"
-            >
-              {/* Header */}
-              <div className="flex justify-between items-center bg-slate-50 dark:bg-[#18262C] -mx-5 -mt-5 p-3 px-4 rounded-t-[24px] border-b border-slate-100 dark:border-[#2C414C]">
-                <div className="flex items-center gap-2">
-                  <Compass size={14} className="text-emerald-500 animate-spin" />
-                  <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{currentStep.badge}</span>
-                </div>
-                <button 
-                  onClick={onClose}
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors pointer-events-auto"
-                  title="Skip Tour"
-                >
-                  <X size={12} />
-                </button>
-              </div>
-
-              {/* Title & Description */}
-              <div className="space-y-1.5">
-                <h4 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight flex items-center gap-1.5">
-                  {currentStep.title}
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-[#a8b8c0] font-medium leading-relaxed">
-                  {currentStep.description}
-                </p>
-                {currentStep.isInteractive && (
-                  <div className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/40 p-1.5 rounded-lg text-amber-800 dark:text-amber-400 font-bold text-[9px] uppercase tracking-wider mt-1.5">
-                    <Sparkles size={10} className="animate-pulse text-amber-600" /> Complete This Action To Advance Automatically!
+            {isCollapsed ? (
+              <motion.div
+                key={`tour-pill-${currentStepIndex}`}
+                initial={{ opacity: 0, y: isTargetAtTop ? 15 : -15, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: isTargetAtTop ? 15 : -15, scale: 0.96 }}
+                transition={{ duration: 0.18 }}
+                style={{
+                  position: 'fixed',
+                  zIndex: 10001,
+                }}
+                className={`fixed left-1/2 -translate-x-1/2 w-[calc(100%-32px)] sm:w-[480px] pointer-events-auto ${
+                  isTargetAtTop 
+                    ? (isMobile ? 'bottom-20' : 'bottom-6') 
+                    : 'top-4'
+                } bg-white/95 dark:bg-[#1E2E35]/95 border-2 border-emerald-500/80 p-3 rounded-2xl shadow-2xl flex items-center justify-between gap-3 text-left backdrop-blur-md`}
+              >
+                {/* Left side text segment */}
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="bg-emerald-555 text-white p-1 rounded-lg shrink-0 flex items-center justify-center">
+                    <Compass size={14} className="animate-spin text-emerald-500" style={{ animationDuration: '6s' }} />
                   </div>
-                )}
-              </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-[8px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider">
+                        Step {currentStepIndex + 1} of {TOUR_STEPS.length}
+                      </span>
+                      <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 uppercase tracking-widest leading-none shrink-0 animate-pulse">
+                        {currentStep.type === 'action' ? 'Action Required' : 'Collapsed'}
+                      </span>
+                    </div>
+                    <h5 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-wider truncate mt-0.5">
+                      {currentStep.title.replace(/^\d+\.\s*/, '')}
+                    </h5>
+                    <p className="text-[10px] text-slate-500 dark:text-[#a8b8c0] font-bold leading-tight truncate">
+                      {currentStep.description}
+                    </p>
+                  </div>
+                </div>
 
-              {/* Progress Panel */}
-              <div className="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-[#2C414C]">
-                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Step {currentStepIndex + 1} of {TOUR_STEPS.length}
-                </span>
-                
-                <div className="flex gap-2">
-                  <button 
-                    onClick={onClose}
-                    className="px-2.5 py-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer pointer-events-auto"
+                {/* Right side buttons segment (completely out of the way) */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <button
+                    onClick={() => setIsCollapsed(false)}
+                    className="p-1 px-2 text-slate-500 dark:text-[#a8b8c0] hover:text-emerald-600 dark:hover:text-emerald-400 font-black text-[8px] uppercase tracking-wider transition-all border border-slate-205/60 dark:border-slate-800 rounded-lg cursor-pointer bg-slate-50 dark:bg-[#152329]"
+                    title="See detailed guidance"
                   >
-                    Skip
+                    Details
                   </button>
-                  {currentStepIndex > 0 && (
-                    <button 
-                      onClick={handlePrev}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#18262C] dark:hover:bg-[#2a3c46] text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase rounded-lg transition-colors cursor-pointer pointer-events-auto"
-                    >
-                      Back
-                    </button>
-                  )}
-                  {/* Hide Next button on interactive steps so users learn by clicking the app element */}
-                  {!currentStep.isInteractive ? (
-                    <button 
+                  {currentStep.type === 'action' ? (
+                    <button
                       onClick={handleNext}
-                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-1 cursor-pointer pointer-events-auto"
+                      className="p-1 px-2 bg-amber-500/10 hover:bg-amber-500/25 text-amber-600 dark:text-amber-400 font-bold text-[8px] uppercase tracking-wider border border-amber-500/30 rounded-lg cursor-pointer transition-colors"
+                      title="Bypass interactive action"
                     >
-                      {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish' : 'Next'} <ChevronRight size={10} />
+                      Bypass
                     </button>
                   ) : (
-                    <div className="px-3.5 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[9px] font-extrabold uppercase rounded-lg border border-blue-100 dark:border-blue-950 animate-pulse text-center">
-                      Awaiting Action...
+                    <button
+                      onClick={handleNext}
+                      className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[8px] uppercase tracking-wider rounded-lg shadow-sm cursor-pointer transition-colors"
+                    >
+                      Next
+                    </button>
+                  )}
+                  <button
+                    onClick={onClose}
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors"
+                    title="Skip walkthrough"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`tour-card-${currentStepIndex}`}
+                initial={{ opacity: 0, y: 15, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.97 }}
+                transition={{ duration: 0.18 }}
+                style={cardPosition.style}
+                className="pointer-events-auto bg-white/95 dark:bg-[#1E2E35] border border-slate-200 dark:border-[#2C414C] p-5 rounded-[24px] shadow-2xl flex flex-col gap-4 z-[10001] text-left backdrop-blur-md"
+              >
+                {/* Header with Minimize */}
+                <div className="flex justify-between items-center bg-slate-50 dark:bg-[#152329] -mx-5 -mt-5 p-3.5 px-5 rounded-t-[24px] border-b border-slate-100 dark:border-[#2C414C]">
+                  <div className="flex items-center gap-2">
+                    <Compass size={14} className="text-emerald-500 animate-spin" style={{ animationDuration: '4s' }} />
+                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${getBadgeColors(currentStep.type)}`}>
+                      {currentStep.badge}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 pointer-events-auto">
+                    <button
+                      onClick={() => setIsCollapsed(true)}
+                      className="p-1 px-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-[8px] font-black uppercase tracking-wider rounded-lg border border-slate-200/50 dark:border-slate-800 cursor-pointer transition-colors"
+                      title="Minimize this guide to keep workspace clear"
+                    >
+                      Minimize
+                    </button>
+                    <button 
+                      onClick={onClose}
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-colors pointer-events-auto"
+                      title="Skip Tour"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Title & supportive explanation */}
+                <div className="space-y-1.5 px-1">
+                  <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                    {currentStep.title}
+                  </h4>
+                  <p className="text-xs text-slate-500 dark:text-[#a8b8c0] font-bold leading-relaxed">
+                    {currentStep.description}
+                  </p>
+                  {currentStep.type === 'action' && (
+                    <div className="inline-flex items-center gap-1.5 bg-amber-50/50 dark:bg-amber-955/10 border border-amber-100 dark:border-amber-900/30 p-1.5 rounded-lg text-amber-800 dark:text-amber-400 font-bold text-[8px] uppercase tracking-wider mt-1 w-full text-center justify-center">
+                      <Sparkles size={10} className="animate-pulse text-amber-500 shrink-0" /> Interactive indicator: select highlighted item!
                     </div>
                   )}
                 </div>
-              </div>
-            </motion.div>
+
+                {/* Interface progress & safe skip actions */}
+                <div className="flex justify-between items-center pt-2.5 px-1 border-t border-slate-100 dark:border-[#2C414C]">
+                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                    Step {currentStepIndex + 1} of {TOUR_STEPS.length}
+                  </span>
+                  
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={onClose}
+                      className="px-2 py-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-[9px] font-black uppercase tracking-wider transition-colors cursor-pointer pointer-events-auto"
+                    >
+                      Skip
+                    </button>
+                    {currentStepIndex > 0 && (
+                      <button 
+                        onClick={handlePrev}
+                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-[#152329] dark:hover:bg-[#1E2E35] text-slate-600 dark:text-slate-300 text-[9px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer pointer-events-auto border border-slate-200 dark:border-[#2C414C]/30"
+                      >
+                        Back
+                      </button>
+                    )}
+                    {currentStep.type !== 'action' ? (
+                      <button 
+                        onClick={handleNext}
+                        className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase tracking-wider rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-1 cursor-pointer pointer-events-auto"
+                      >
+                        {currentStepIndex === TOUR_STEPS.length - 1 ? 'Finish Tour' : 'Next'} <ChevronRight size={10} />
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={handleNext}
+                          className="px-2 py-1 text-slate-400 dark:text-slate-500 hover:text-amber-600 dark:hover:text-amber-400 text-[8px] font-black uppercase tracking-wider rounded-md border border-slate-200 dark:border-slate-800 pointer-events-auto transition-all cursor-pointer bg-slate-50/50 dark:bg-[#152329]"
+                          title="Bypass performing this active log step and advance"
+                        >
+                          Bypass
+                        </button>
+                        <div className="px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[8px] font-black uppercase tracking-widest rounded-lg border border-amber-500/20 text-center animate-pulse">
+                          Awaiting Action...
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>

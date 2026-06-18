@@ -1933,6 +1933,9 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
       setSelectedMoods(selectedMoods.filter(m => m !== type));
     } else {
       setSelectedMoods([...selectedMoods, type]);
+      if (type === 'Calm') {
+        window.dispatchEvent(new CustomEvent('tour_mood_selected', { detail: { mood: 'Calm' } }));
+      }
     }
   };
 
@@ -1964,6 +1967,7 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
         localStorage.setItem('vitalmind_last_tip', tipText);
         window.dispatchEvent(new CustomEvent('vitalmind_show_tip', { detail: { tip: tipText, mood: primaryMood } }));
 
+        window.dispatchEvent(new CustomEvent('tour_mood_saved'));
         onComplete();
         return;
       }
@@ -1983,6 +1987,7 @@ function MoodLoggerView({ onComplete, userId }: { onComplete: () => void, userId
       localStorage.setItem('vitalmind_last_tip', tipText);
       window.dispatchEvent(new CustomEvent('vitalmind_show_tip', { detail: { tip: tipText, mood: primaryMood } }));
 
+      window.dispatchEvent(new CustomEvent('tour_mood_saved'));
       onComplete();
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, path);
@@ -2137,8 +2142,14 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
   const [saving, setSaving] = useState(false);
 
   const toggle = (s: SymptomType) => {
-    if (selected.includes(s)) setSelected(selected.filter(i => i !== s));
-    else setSelected([...selected, s]);
+    if (selected.includes(s)) {
+      setSelected(selected.filter(i => i !== s));
+    } else {
+      setSelected([...selected, s]);
+      if (s === 'Fatigue') {
+        window.dispatchEvent(new CustomEvent('tour_symptom_selected', { detail: { symptom: 'Fatigue' } }));
+      }
+    }
   };
 
   const mentalEmotionalSymptoms: SymptomType[] = [
@@ -2189,6 +2200,7 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
         const updated = [newLog, ...localLogs];
         localStorage.setItem('vitalmind_symptom_logs_guest', JSON.stringify(updated));
         window.dispatchEvent(new Event('vitalmind_guest_data_changed'));
+        window.dispatchEvent(new CustomEvent('tour_symptom_saved'));
         onComplete();
         return;
       }
@@ -2198,6 +2210,7 @@ function SymptomLoggerView({ onComplete, onNavigateToCrisis, userId }: { onCompl
         symptoms: selected,
         timestamp: serverTimestamp()
       });
+      window.dispatchEvent(new CustomEvent('tour_symptom_saved'));
       onComplete();
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, path);
