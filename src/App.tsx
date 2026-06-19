@@ -2635,11 +2635,11 @@ function HistoryView({
 
   return (
     <div className="space-y-10 selection:bg-blue-100">
-      <div className="flex justify-between items-center">
-        <button onClick={onBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-xs font-black uppercase tracking-widest transition-colors cursor-pointer">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <button onClick={onBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-xs font-black uppercase tracking-widest transition-colors cursor-pointer w-fit">
           <ChevronRight className="rotate-180" size={16} /> Back to Dashboard
         </button>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={exportToCSV}
             disabled={moodLogs.length === 0}
