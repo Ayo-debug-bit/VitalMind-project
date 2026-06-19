@@ -1,6 +1,6 @@
 {
-  "name": "Preventive Healthcare and Mental Wellness Support Application",
-  "short_name": "Preventive Healthcare & Mental Wellness",
+  "name": "Preventive Healthcare and Mental Wellness",
+  "short_name": "Preventive Healthcare",
   "description": "Preventive Healthcare and Mental Wellness Support Application",
   "start_url": "/",
   "display": "standalone",
@@ -9,15 +9,21 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/logo.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/logo.svg",
+      "src": "/logo.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ]
 }

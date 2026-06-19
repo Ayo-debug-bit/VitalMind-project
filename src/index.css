@@ -77,11 +77,22 @@
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
+.pt-safe {
+  padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+}
+
 /* Prevent auto-zooming on iOS inputs by ensuring standard font size is at least 16px */
 input:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl),
 select:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl),
 textarea:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl),
 .input-field:not(.text-lg):not(.text-xl):not(.text-2xl):not(.text-3xl) {
   font-size: 16px !important;
+}
+
+/* Scroll lock prevention and lateral shifting elimination */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
 }
 

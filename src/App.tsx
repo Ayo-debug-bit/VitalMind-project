@@ -1003,7 +1003,7 @@ function AppContent() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className={`min-h-[5rem] h-auto py-3 border-b px-4 sm:px-6 md:px-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 transition-all ${
+        <header className={`pt-safe min-h-[5rem] h-auto py-3 border-b px-4 sm:px-6 md:px-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 transition-all ${
           theme === 'dark' 
             ? 'bg-[#131F24]/90 backdrop-blur-md border-[#2C414C] text-white' 
             : 'bg-white/85 backdrop-blur-md border-[#CCFBF1]/40'
@@ -1073,7 +1073,7 @@ function AppContent() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 pb-28 lg:pb-10">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 md:p-10 pb-28 lg:pb-10">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
@@ -1387,7 +1387,7 @@ function AppContent() {
                     logout();
                     setShowLogoutConfirm(false);
                   }}
-                  className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-red-700 shadow-lg shadow-red-100 dark:shadow-none transition-all"
+                  className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-red-700 shadow-md shadow-red-500/10 dark:shadow-none transition-all"
                 >
                   Log Out
                 </button>
@@ -1521,7 +1521,7 @@ function DashboardView({
       <div className="col-span-12">
         <div className="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-600 dark:border-red-500 p-4 rounded-r-2xl flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-red-600 dark:bg-red-700 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-200 dark:shadow-red-950/30">
+            <div className="w-10 h-10 bg-red-600 dark:bg-red-700 rounded-full flex items-center justify-center text-white shrink-0 shadow-md shadow-red-500/10 dark:shadow-red-950/20">
               <Zap size={20} />
             </div>
             <div>
@@ -1544,7 +1544,7 @@ function DashboardView({
           <button 
             id="dashboard-crisis-btn"
             onClick={() => setView('crisis')}
-            className="px-6 py-2 bg-red-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-500/15 dark:shadow-none whitespace-nowrap"
+            className="px-6 py-2 bg-red-600 text-white text-[10px] font-black rounded-xl uppercase tracking-widest hover:bg-red-700 transition-all shadow-sm shadow-red-500/10 dark:shadow-none whitespace-nowrap"
           >
             {t.getHelpNow}
           </button>
@@ -3589,7 +3589,7 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
           <ChevronRight className="rotate-180" size={16} /> Back to Dashboard
         </button>
         <div className="flex items-center gap-4 mb-2">
-          <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-red-100 animate-pulse">
+          <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-md shadow-red-500/10 animate-pulse">
             <AlertCircle size={24} />
           </div>
           <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Crisis Support</h1>
@@ -3742,7 +3742,7 @@ function CrisisOverlay({ onClose }: { onClose: () => void }) {
         </button>
 
         <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-red-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-8 shadow-2xl shadow-red-200 dark:shadow-none">
+          <div className="w-20 h-20 bg-red-600 rounded-3xl flex items-center justify-center text-white mx-auto mb-8 shadow-md shadow-red-500/10 dark:shadow-none">
             <AlertCircle size={40} />
           </div>
           <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase mb-4">Emergency Support</h2>
