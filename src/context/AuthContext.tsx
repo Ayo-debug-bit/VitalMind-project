@@ -10,6 +10,10 @@ import {
   browserSessionPersistence 
 } from 'firebase/auth';
 import { getDoc, setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { safeLocalStorage, safeSessionStorage } from '../lib/safeStorage';
+
+const localStorage = safeLocalStorage;
+const sessionStorage = safeSessionStorage;
 
 interface AuthContextType {
   user: User | null;
@@ -29,7 +33,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Helper for offline-safe security answer hashing
 export async function hashAnswer(answer: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(answer.toLowerCase().trim());
+  const normalized = answer.toLowerCase().trim();
+  if (typeof crypto === 'undefined' || !crypto.subtle) {
+    // Simple pure JS hash fallback to prevent crashes in non-HTTPS / sandboxed iframe environments
+    let hash = 5381;
+    for (let i = 0; i < normalized.length; i++) {
+      hash = (hash * 33) ^ normalized.charCodeAt(i);
+    }
+    return (hash >>> 0).toString(16).padStart(8, '0');
+  }
+  const msgBuffer = new TextEncoder().encode(normalized);
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');

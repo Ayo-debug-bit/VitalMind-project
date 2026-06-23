@@ -6,6 +6,9 @@ import {
   Compass, 
   Sparkles
 } from 'lucide-react';
+import { safeStorage } from '../lib/safeStorage';
+
+const localStorage = safeStorage;
 
 interface TourStep {
   id: string;

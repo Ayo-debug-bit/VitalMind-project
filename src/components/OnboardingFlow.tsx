@@ -87,11 +87,15 @@ export function OnboardingFlow({ onComplete, initialName, onCancel }: Onboarding
   const t = TRANSLATIONS['en'];
 
   const speakOnboarding = (text: string) => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("Onboarding speech synthesis failed:", e);
+      }
     }
   };
 

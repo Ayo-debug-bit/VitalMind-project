@@ -41,6 +41,7 @@ import { AuthScreens } from './components/AuthScreens';
 import { jsPDF } from 'jspdf';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { InteractiveTour } from './components/InteractiveTour';
+import { safeStorage } from './lib/safeStorage';
 import { 
   evaluateWellness, 
   MoodType, 
@@ -74,6 +75,8 @@ import {
   serverTimestamp,
   deleteDoc
 } from 'firebase/firestore';
+
+const localStorage = safeStorage;
 
 enum OperationType {
   CREATE = 'create',
@@ -162,11 +165,15 @@ function AppContent() {
   });
 
   const speakText = (text: string) => {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("Speech synthesis failed:", e);
+      }
     }
   };
 
@@ -180,6 +187,23 @@ function AppContent() {
   const [communityVote, setCommunityVote] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState<boolean>(typeof window !== 'undefined' ? !window.navigator.onLine : false);
   const [activeSupportTip, setActiveSupportTip] = useState<string | null>(null);
+
+  // Redirect standard window.alert calls to the custom Modal component to prevent DOMException crashes inside sandboxed iframe
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const originalAlert = window.alert;
+      window.alert = (message?: any) => {
+        console.warn("Intercepted alert():", message);
+        setModalInfo({
+          title: "System Notification",
+          content: String(message)
+        });
+      };
+      return () => {
+        window.alert = originalAlert;
+      };
+    }
+  }, []);
 
   // PWA installation helper states
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -2639,18 +2663,18 @@ function HistoryView({
         <button onClick={onBack} className="text-slate-400 hover:text-slate-600 flex items-center gap-2 text-xs font-black uppercase tracking-widest transition-colors cursor-pointer w-fit">
           <ChevronRight className="rotate-180" size={16} /> Back to Dashboard
         </button>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={exportToCSV}
             disabled={moodLogs.length === 0}
-            className="py-3 px-4 text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl font-black uppercase tracking-widest text-slate-700 dark:text-slate-350 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-xs shrink-0"
+            className="py-3 px-4 text-[10px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl font-black uppercase tracking-wider text-slate-700 dark:text-slate-350 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-xs flex-1 sm:flex-none sm:w-auto text-center"
           >
             <Download size={14} /> Export CSV
           </button>
           <button
             onClick={exportToPDF}
             disabled={moodLogs.length === 0}
-            className="py-3 px-4 text-[10px] bg-emerald-600 dark:bg-emerald-500 text-white hover:bg-emerald-700 dark:hover:bg-emerald-650 rounded-xl font-black uppercase tracking-widest flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-xs shrink-0"
+            className="py-3 px-4 text-[10px] bg-emerald-600 dark:bg-emerald-500 text-white hover:bg-emerald-700 dark:hover:bg-emerald-650 rounded-xl font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 shadow-xs flex-1 sm:flex-none sm:w-auto text-center"
           >
             <Download size={14} /> Clinical PDF Report
           </button>
@@ -3574,11 +3598,22 @@ function CrisisView({ safetyContacts = [], onBack }: { safetyContacts?: any[], o
 
   const handleCopy = (num: string, id: string) => {
     try {
-      navigator.clipboard.writeText(num);
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(num);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = num;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 3000);
     } catch (e) {
-      console.error(e);
+      console.warn("Clipboard copy failed, using fallback:", e);
     }
   };
 

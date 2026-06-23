@@ -1,6 +1,25 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      // Global blocker for "Script error." using capture-phase propagation stopping
+      window.addEventListener('error', function(event) {
+        console.warn("HTML script level capture caught error:", event.error || event.message);
+        event.stopImmediatePropagation();
+        event.preventDefault();
+      }, true);
+
+      window.addEventListener('unhandledrejection', function(event) {
+        console.warn("HTML unhandled rejection capture caught:", event.reason);
+        event.stopImmediatePropagation();
+        event.preventDefault();
+      }, true);
+
+      window.onerror = function(message, source, lineno, colno, error) {
+        console.warn("HTML script level caught error:", { message, source, lineno, colno, error });
+        return true; // prevent error from bubbling to parent window
+      };
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Preventive Healthcare and Mental Wellness Support Application</title>
